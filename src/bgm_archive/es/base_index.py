@@ -30,16 +30,19 @@ class BaseIndex(Generic[ModelType]):
         self.__model_type = model_type
 
     async def get_by_id(self, id: int) -> ModelType | None:
-        response = await self.__es.search(index=self.__index_name, query={"term": {"id": id}})
+        response = await self.__es.search(
+            index=self.__index_name, query={"term": {"id": id}}
+        )
         print(response)
-        hits = response.get('hits', {}).get('hits', [])
+        hits = response.get("hits", {}).get("hits", [])
         if len(hits) == 0:
             return None
         elif len(hits) == 1:
-            return self.__model_type.model_validate(hits[0]['_source'])
+            return self.__model_type.model_validate(hits[0]["_source"])
         else:
             logger.warning(
-                f"Multiple hits found for id {id} in index {self.__index_name} - len(hits)={len(hits)}")
+                f"Multiple hits found for id {id} in index {self.__index_name} - len(hits)={len(hits)}"
+            )
             return None
 
     async def recreate_index(self):
@@ -57,6 +60,7 @@ class BaseIndex(Generic[ModelType]):
         self, documents: Iterable[BaseModel] | AsyncIterable[BaseModel]
     ):
         if isinstance(documents, AsyncIterable):
+
             async def producer():  # pyright: ignore[reportRedeclaration]
                 async for doc in documents:
                     # print(f"Indexing document: {doc}")
@@ -81,5 +85,4 @@ class BaseIndex(Generic[ModelType]):
 
     @property
     def es_mappings(self) -> dict:
-        raise NotImplementedError(
-            "Subclasses must implement the mappings property")
+        raise NotImplementedError("Subclasses must implement the mappings property")

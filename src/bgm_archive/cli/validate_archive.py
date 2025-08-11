@@ -28,20 +28,33 @@ def validate_wiki_archive(path: Path):
 
     # not faster in the same process :rolling-eyes:
     with cf.ThreadPoolExecutor(max_workers=1) as executor:
-        for index, (desc, count_key, iterable) in enumerate([
-            ("Subjects", "subjects", loader.subjects()),
-            ("Persons", "persons", loader.persons()),
-            ("Characters", "characters", loader.characters()),
-            ("Episodes", "episodes", loader.episodes()),
-            ("Subject Relations", "subject_relations", loader.subject_relations()),
-            ("Subject-Person Relations", "subject_persons", loader.subject_persons()),
-            ("Subject-Character Relations",
-             "subject_characters", loader.subject_characters()),
-            ("Person-Character Relations",
-             "person_characters", loader.person_characters())
-        ]):
-            executor.submit(work, position=0, desc=desc,
-                            count_key=count_key, iterable=iterable)
+        for index, (desc, count_key, iterable) in enumerate(
+            [
+                ("Subjects", "subjects", loader.subjects()),
+                ("Persons", "persons", loader.persons()),
+                ("Characters", "characters", loader.characters()),
+                ("Episodes", "episodes", loader.episodes()),
+                ("Subject Relations", "subject_relations", loader.subject_relations()),
+                (
+                    "Subject-Person Relations",
+                    "subject_persons",
+                    loader.subject_persons(),
+                ),
+                (
+                    "Subject-Character Relations",
+                    "subject_characters",
+                    loader.subject_characters(),
+                ),
+                (
+                    "Person-Character Relations",
+                    "person_characters",
+                    loader.person_characters(),
+                ),
+            ]
+        ):
+            executor.submit(
+                work, position=0, desc=desc, count_key=count_key, iterable=iterable
+            )
 
     # Print summary
     print("\nValidation Summary:")
@@ -53,8 +66,7 @@ def validate_wiki_archive(path: Path):
         print(f"First validation errors for {model_class.__name__}:")
         for error in errors[:3]:
             print(f"  - {error}")
-        problematic_values = set(ed["input"]
-                                 for e in errors for ed in e.errors())
+        problematic_values = set(ed["input"] for e in errors for ed in e.errors())
         print(f"  - input values: {problematic_values}")
 
     return entity_counts

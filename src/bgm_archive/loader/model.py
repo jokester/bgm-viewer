@@ -3,8 +3,7 @@ from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .normalizer import launder_date
 
-_config = ConfigDict(use_enum_values=False,
-                     str_strip_whitespace=True, extra="forbid")
+_config = ConfigDict(use_enum_values=False, str_strip_whitespace=True, extra="forbid")
 
 
 class SubjectType(IntEnum):
@@ -489,7 +488,7 @@ class Subject(BaseModel):
     series: bool
     meta_tags: Optional[list[str]] = None
 
-    @field_validator('date')
+    @field_validator("date")
     def strip_date(cls, v: Optional[str]) -> Optional[str]:
         return launder_date(v)
 
@@ -539,7 +538,7 @@ class Episode(BaseModel):
     sort: int | float
     type: EpisodeType
 
-    @field_validator('airdate')
+    @field_validator("airdate")
     def strip_date(cls, v: Optional[str]) -> Optional[str]:
         return launder_date(v)
 

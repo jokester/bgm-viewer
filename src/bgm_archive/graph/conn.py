@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class DuckWrapper():
+class DuckWrapper:
     def __init__(self, path: str | Path):
         self._path = Path(path)
         self._conn: duckdb.DuckDBPyConnection = None  # type: ignore
@@ -21,15 +21,18 @@ class DuckWrapper():
         with self.open_db(read_only=True) as conn:
             result = conn.execute(f"SELECT * FROM {table_name} LIMIT 10").df()
             return result
+
     def count_table(self, table_name: str) -> int:
         with self.open_db(read_only=True) as conn:
-            result = conn.execute(
-                f"SELECT COUNT(*) FROM {table_name}").fetchone()
+            result = conn.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()
             return result[0] if result else 0
 
     def list_extensions(self) -> duckdb.DuckDBPyConnection:
         with self.open_db(read_only=True) as conn:
             return conn.execute("SELECT * FROM duckdb_extensions();")
+
+    def open_db2(self, read_only=False) -> ContextManager[duckdb.DuckDBPyConnection]:
+        return contextlib.closing(duckdb.connect(self._path, read_only=read_only))
 
     def open_db(self, read_only=False) -> ContextManager[duckdb.DuckDBPyConnection]:
         @contextlib.contextmanager
@@ -40,11 +43,11 @@ class DuckWrapper():
             yield db  # type: ignore
             self._conn = None  # type: ignore
             db.close()
+
         return create()
 
 
 class BgmGraph(DuckWrapper):
-
     def setup_db(self):
         with self.open_db() as conn:
             conn.install_extension("duckpgq", repository="community")
@@ -55,16 +58,24 @@ class BgmGraph(DuckWrapper):
         with self.open_db(read_only=False) as conn:
             conn.execute(_CREATE_TABLE_SQL).fetchall()
 
-    def import_all(self, loader: WikiArchiveLoader, *, chunk_size=50000, limit=None, progress_bar=False):
-
+    def import_all(
+        self,
+        loader: WikiArchiveLoader,
+        *,
+        chunk_size=50000,
+        limit=None,
+        progress_bar=False,
+    ):
         def wrap_iterator(iterator: Iterator) -> Iterator:
             if limit:
                 iterator = itertools.islice(iterator, limit)
             if progress_bar:
                 from tqdm import tqdm
+
                 yield from tqdm(iterator)
             else:
                 yield from iterator
+
         """Import all data from the loader into the database"""
 
         with self.open_db(read_only=False):
@@ -75,27 +86,30 @@ class BgmGraph(DuckWrapper):
             self.import_persons(wrap_iterator(loader.persons()), chunk_size)
             logger.info("Imported persons")
 
-            self.import_characters(wrap_iterator(
-                loader.characters()), chunk_size)
+            self.import_characters(wrap_iterator(loader.characters()), chunk_size)
             logger.info("Imported characters")
 
             self.import_episodes(wrap_iterator(loader.episodes()), chunk_size)
             logger.info("Imported episodes")
 
-            self.import_subject_relations(wrap_iterator(
-                loader.subject_relations()), chunk_size)
+            self.import_subject_relations(
+                wrap_iterator(loader.subject_relations()), chunk_size
+            )
             logger.info("Imported subject relations")
 
-            self.import_subject_persons(wrap_iterator(
-                loader.subject_persons()), chunk_size)
+            self.import_subject_persons(
+                wrap_iterator(loader.subject_persons()), chunk_size
+            )
             logger.info("Imported subject persons")
 
-            self.import_subject_characters(wrap_iterator(
-                loader.subject_characters()), chunk_size)
+            self.import_subject_characters(
+                wrap_iterator(loader.subject_characters()), chunk_size
+            )
             logger.info("Imported subject characters")
 
-            self.import_person_characters(wrap_iterator(
-                loader.person_characters()), chunk_size)
+            self.import_person_characters(
+                wrap_iterator(loader.person_characters()), chunk_size
+            )
             logger.info("Imported person characters")
 
     def import_subjects(self, subjects: Iterator[model.Subject], chunk_size=1000):
@@ -104,7 +118,8 @@ class BgmGraph(DuckWrapper):
                 """INSERT INTO Subjects
                   (id, type, name, name_cn, infobox, platform, summary, nsfw, score, rank, "date", favorite_wish, favorite_done, favorite_doing, favorite_on_hold, favorite_dropped, series)
                   VALUES
-                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
+                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                [
                     (
                         subject.id,
                         subject.type.value,
@@ -125,7 +140,8 @@ class BgmGraph(DuckWrapper):
                         subject.series,
                     )
                     for subject in chunk
-                ])
+                ],
+            )
 
     def import_persons(self, persons: Iterator[model.Person], chunk_size=1000):
         for chunk in itertools.batched(persons, chunk_size):
@@ -133,7 +149,8 @@ class BgmGraph(DuckWrapper):
                 """INSERT INTO Persons
                   (id, name, type, career, infobox, summary, comments, collects)
                   VALUES
-                  (?, ?, ?, ?, ?, ?, ?, ?)""", [
+                  (?, ?, ?, ?, ?, ?, ?, ?)""",
+                [
                     (
                         person.id,
                         person.name,
@@ -145,7 +162,8 @@ class BgmGraph(DuckWrapper):
                         person.collects,
                     )
                     for person in chunk
-                ])
+                ],
+            )
 
     def import_characters(self, characters: Iterator[model.Character], chunk_size=1000):
         for chunk in itertools.batched(characters, chunk_size):
@@ -153,7 +171,8 @@ class BgmGraph(DuckWrapper):
                 """INSERT INTO Characters
                   (id, role, name, infobox, summary, comments, collects)
                   VALUES
-                  (?, ?, ?, ?, ?, ?, ?)""", [
+                  (?, ?, ?, ?, ?, ?, ?)""",
+                [
                     (
                         character.id,
                         character.role.value,
@@ -164,7 +183,8 @@ class BgmGraph(DuckWrapper):
                         character.collects,
                     )
                     for character in chunk
-                ])
+                ],
+            )
 
     def import_episodes(self, episodes: Iterator[model.Episode], chunk_size=1000):
         for chunk in itertools.batched(episodes, chunk_size):
@@ -172,7 +192,8 @@ class BgmGraph(DuckWrapper):
                 """INSERT INTO Episodes
                   (id, name, name_cn, description, airdate, disc, duration, subject_id, sort, type)
                   VALUES
-                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
+                  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                [
                     (
                         episode.id,
                         episode.name,
@@ -186,15 +207,19 @@ class BgmGraph(DuckWrapper):
                         episode.type.value,
                     )
                     for episode in chunk
-                ])
+                ],
+            )
 
-    def import_subject_relations(self, relations: Iterator[model.SubjectRelation], chunk_size=1000):
+    def import_subject_relations(
+        self, relations: Iterator[model.SubjectRelation], chunk_size=1000
+    ):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO SubjectRelation
                   (subject_id, relation_type, related_subject_id, order_idx)
                   VALUES
-                  (?, ?, ?, ?)""", [
+                  (?, ?, ?, ?)""",
+                [
                     (
                         relation.subject_id,
                         relation.relation_type.value,
@@ -202,30 +227,38 @@ class BgmGraph(DuckWrapper):
                         relation.order,
                     )
                     for relation in chunk
-                ])
+                ],
+            )
 
-    def import_subject_persons(self, relations: Iterator[model.SubjectPerson], chunk_size=1000):
+    def import_subject_persons(
+        self, relations: Iterator[model.SubjectPerson], chunk_size=1000
+    ):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO SubjectPersons
                   (person_id, subject_id, position)
                   VALUES
-                  (?, ?, ?)""", [
+                  (?, ?, ?)""",
+                [
                     (
                         relation.person_id,
                         relation.subject_id,
                         relation.position.value,
                     )
                     for relation in chunk
-                ])
+                ],
+            )
 
-    def import_subject_characters(self, relations: Iterator[model.SubjectCharacter], chunk_size=1000):
+    def import_subject_characters(
+        self, relations: Iterator[model.SubjectCharacter], chunk_size=1000
+    ):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO SubjectCharacter
                   (character_id, subject_id, type, order_idx)
                   VALUES
-                  (?, ?, ?, ?)""", [
+                  (?, ?, ?, ?)""",
+                [
                     (
                         relation.character_id,
                         relation.subject_id,
@@ -233,15 +266,19 @@ class BgmGraph(DuckWrapper):
                         relation.order,
                     )
                     for relation in chunk
-                ])
+                ],
+            )
 
-    def import_person_characters(self, relations: Iterator[model.PersonCharacter], chunk_size=1000):
+    def import_person_characters(
+        self, relations: Iterator[model.PersonCharacter], chunk_size=1000
+    ):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO PersonCharacter
                   (person_id, subject_id, character_id, summary)
                   VALUES
-                  (?, ?, ?, ?)""", [
+                  (?, ?, ?, ?)""",
+                [
                     (
                         relation.person_id,
                         relation.subject_id,
@@ -249,7 +286,8 @@ class BgmGraph(DuckWrapper):
                         relation.summary,
                     )
                     for relation in chunk
-                ])
+                ],
+            )
 
 
 _CREATE_TABLE_SQL = """

@@ -20,41 +20,58 @@ def launder_date(date: Optional[str], warning=True) -> Optional[str]:
 
     # Month name mapping
     month_names = {
-        'january': '01', 'february': '02', 'march': '03', 'april': '04',
-        'may': '05', 'june': '06', 'july': '07', 'august': '08',
-        'september': '09', 'october': '10', 'november': '11', 'december': '12',
-        'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04',
-        'jun': '06', 'jul': '07', 'aug': '08', 'sep': '09',
-        'oct': '10', 'nov': '11', 'dec': '12'
+        "january": "01",
+        "february": "02",
+        "march": "03",
+        "april": "04",
+        "may": "05",
+        "june": "06",
+        "july": "07",
+        "august": "08",
+        "september": "09",
+        "october": "10",
+        "november": "11",
+        "december": "12",
+        "jan": "01",
+        "feb": "02",
+        "mar": "03",
+        "apr": "04",
+        "jun": "06",
+        "jul": "07",
+        "aug": "08",
+        "sep": "09",
+        "oct": "10",
+        "nov": "11",
+        "dec": "12",
     }
 
     # Pattern for YYYY-M-D or YYYY-MM-D or YYYY-M-DD formats (with hyphens)
-    dash_pattern = r'^(\d{4})-(\d{1,2})-(\d{1,2})$'
+    dash_pattern = r"^(\d{4})-(\d{1,2})-(\d{1,2})$"
     dash_match = re.match(dash_pattern, cleaned)
 
     # Pattern for YYYY/MM/DD format (with slashes)
-    slash_pattern = r'^(\d{4})/(\d{1,2})/(\d{1,2})$'
+    slash_pattern = r"^(\d{4})/(\d{1,2})/(\d{1,2})$"
     slash_match = re.match(slash_pattern, cleaned)
 
     # Pattern for CJK date format (YYYY年MM月DD日)
-    cjk_pattern = r'^(\d{4})年(\d{1,2})月(\d{1,2})日$'
+    cjk_pattern = r"^(\d{4})年(\d{1,2})月(\d{1,2})日$"
     cjk_match = re.match(cjk_pattern, cleaned)
 
     # Pattern for European date format (DD.MM.YYYY)
-    dot_pattern = r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$'
+    dot_pattern = r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$"
     dot_match = re.match(dot_pattern, cleaned)
 
     # Pattern for YYYY.M.D format (with dots)
-    dot_ymd_pattern = r'^(\d{4})\.(\d{1,2})\.(\d{1,2})$'
+    dot_ymd_pattern = r"^(\d{4})\.(\d{1,2})\.(\d{1,2})$"
     dot_ymd_match = re.match(dot_ymd_pattern, cleaned)
 
     # Pattern for English date format (Month DD, YYYY)
-    english_pattern = r'^([a-zA-Z]+)\s+(\d{1,2}),\s+(\d{4})$'
+    english_pattern = r"^([a-zA-Z]+)\s+(\d{1,2}),\s+(\d{4})$"
     english_match = re.match(english_pattern, cleaned)
 
     # Pattern for malformed date-like strings that should return None
     # YYYY-DDD format (day number too large)
-    malformed_dash = r'^(\d{4})-(\d+)$'
+    malformed_dash = r"^(\d{4})-(\d+)$"
     malformed_dash_match = re.match(malformed_dash, cleaned)
 
     if malformed_dash_match:

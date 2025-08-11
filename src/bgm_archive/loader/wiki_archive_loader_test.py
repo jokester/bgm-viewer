@@ -18,8 +18,7 @@ def test_loader():
     current_dir = Path(__file__).parent
     test_archive_path = current_dir / "__test_data" / "test_archive.zip"
 
-    assert test_archive_path.exists(
-    ), f"Test archive not found at {test_archive_path}"
+    assert test_archive_path.exists(), f"Test archive not found at {test_archive_path}"
     loader = WikiArchiveLoader(str(test_archive_path))
 
     # Test loading each type of data

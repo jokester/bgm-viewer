@@ -63,8 +63,7 @@ class WikiArchiveLoader:
         """
         self.__archive_path = archive_path
         self.__stop_on_error = stop_on_error
-        self.__validation_errors: dict[type,
-                                       list[ValidationError]] = defaultdict(list)
+        self.__validation_errors: dict[type, list[ValidationError]] = defaultdict(list)
 
     @contextmanager
     def _open_archive(self):
@@ -102,8 +101,7 @@ class WikiArchiveLoader:
                             if not line_str:  # Skip empty lines
                                 continue
 
-                            validated_entry = model_class.model_validate_json(
-                                line_str)
+                            validated_entry = model_class.model_validate_json(line_str)
                             yield validated_entry
 
                         except ValidationError as e:
