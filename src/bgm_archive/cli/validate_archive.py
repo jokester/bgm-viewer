@@ -1,5 +1,8 @@
+from turtle import position
+from typing import Iterable
 import click
 import tqdm
+import concurrent.futures as cf
 from pathlib import Path
 from collections import Counter
 from ..loader.wiki_archive_loader import WikiArchiveLoader
@@ -20,45 +23,26 @@ def validate_wiki_archive(path: Path):
     loader = WikiArchiveLoader(str(path), stop_on_error=False)
     entity_counts = Counter()
 
-    # Process subjects
-    print("Validating subjects...")
-    for _ in tqdm.tqdm(loader.subjects(), desc="Subjects"):
-        entity_counts["subjects"] += 1
+    def work(*, position: int, desc: str, count_key: str, iterable: Iterable):
+        for _ in tqdm.tqdm(iterable, desc=desc):
+            entity_counts[count_key] += 1
 
-    # Process persons
-    print("Validating persons...")
-    for _ in tqdm.tqdm(loader.persons(), desc="Persons"):
-        entity_counts["persons"] += 1
-
-    # Process characters
-    print("Validating characters...")
-    for _ in tqdm.tqdm(loader.characters(), desc="Characters"):
-        entity_counts["characters"] += 1
-
-    # Process episodes
-    print("Validating episodes...")
-    for _ in tqdm.tqdm(loader.episodes(), desc="Episodes"):
-        entity_counts["episodes"] += 1
-
-    # Process subject relations
-    print("Validating subject relations...")
-    for _ in tqdm.tqdm(loader.subject_relations(), desc="Subject Relations"):
-        entity_counts["subject_relations"] += 1
-
-    # Process subject persons
-    print("Validating subject-person relations...")
-    for _ in tqdm.tqdm(loader.subject_persons(), desc="Subject-Person Relations"):
-        entity_counts["subject_persons"] += 1
-
-    # Process subject characters
-    print("Validating subject-character relations...")
-    for _ in tqdm.tqdm(loader.subject_characters(), desc="Subject-Character Relations"):
-        entity_counts["subject_characters"] += 1
-
-    # Process person characters
-    print("Validating person-character relations...")
-    for _ in tqdm.tqdm(loader.person_characters(), desc="Person-Character Relations"):
-        entity_counts["person_characters"] += 1
+    # not faster in the same process :rolling-eyes:
+    with cf.ThreadPoolExecutor(max_workers=1) as executor:
+        for index, (desc, count_key, iterable) in enumerate([
+            ("Subjects", "subjects", loader.subjects()),
+            ("Persons", "persons", loader.persons()),
+            ("Characters", "characters", loader.characters()),
+            ("Episodes", "episodes", loader.episodes()),
+            ("Subject Relations", "subject_relations", loader.subject_relations()),
+            ("Subject-Person Relations", "subject_persons", loader.subject_persons()),
+            ("Subject-Character Relations",
+             "subject_characters", loader.subject_characters()),
+            ("Person-Character Relations",
+             "person_characters", loader.person_characters())
+        ]):
+            executor.submit(work, position=0, desc=desc,
+                            count_key=count_key, iterable=iterable)
 
     # Print summary
     print("\nValidation Summary:")
@@ -70,7 +54,8 @@ def validate_wiki_archive(path: Path):
         print(f"First validation errors for {model_class.__name__}:")
         for error in errors[:3]:
             print(f"  - {error}")
-        problematic_values = set(ed["input"] for e in errors for ed in e.errors())
+        problematic_values = set(ed["input"]
+                                 for e in errors for ed in e.errors())
         print(f"  - input values: {problematic_values}")
 
     return entity_counts

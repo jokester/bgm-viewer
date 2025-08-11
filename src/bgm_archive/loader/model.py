@@ -74,11 +74,12 @@ class SubjectRelationType(IntEnum):
     BOOK_SEQUEL = 1006  # Sequel / 续集
     BOOK_SIDE_STORY = 1007  # Side Story / 番外篇
     BOOK_PARENT_STORY = 1008  # Parent Story / 主线故事
-    BOOK_ALTERNATIVE_VERSION = 1010  # Alternative version / 不同版本
+    BOOK_VERSION = 1010  # Version / 不同版本
     BOOK_CHARACTER = 1011  # Character / 角色出演
     BOOK_SAME_SETTING = 1012  # Same setting / 相同世界观
     BOOK_ALTERNATIVE_SETTING = 1013  # Alternative setting / 不同世界观
     BOOK_COLLABORATION = 1014  # Collaboration / 联动
+    BOOK_ALTERNATIVE_VERSION = 1015  # Alternative version / 不同演绎
     BOOK_OTHER = 1099  # Other / 其他
 
     # Music relations (3000-3099)
@@ -117,6 +118,90 @@ class CharacterSubjectType(IntEnum):
     MAIN = 1  # 主角
     SUPPORTING = 2  # 配角
     GUEST = 3  # 客串
+
+
+class PlatformType(IntEnum):
+    """Platform types for different subject types."""
+
+    # Common platforms
+    NONE = 0  # 其他
+
+    # Book platforms (1000-1099)
+    BOOK_COMIC = 1001  # 漫画
+    BOOK_NOVEL = 1002  # 小说
+    BOOK_ILLUSTRATION = 1003  # 画集
+    BOOK_PICTURE = 1004  # 绘本
+    BOOK_PHOTO = 1005  # 写真
+    BOOK_OFFICIAL = 1006  # 公式书
+
+    # Anime platforms (1-99)
+    ANIME_TV = 1  # TV
+    ANIME_OVA = 2  # OVA
+    ANIME_MOVIE = 3  # 剧场版
+    ANIME_SHORT_FILM = 4  # 短片
+    ANIME_WEB = 5  # WEB
+    ANIME_COMIC = 2006  # 动态漫画
+
+    # Music platforms (3000-3099)
+    MUSIC_ALBUM = 3001  # 专辑
+    MUSIC_DRAMA = 3002  # 广播剧
+    MUSIC_AUDIO = 3003  # 音声
+    MUSIC_RADIO = 3004  # 电台
+
+    # Game platforms (4000-4099)
+    GAME_GAMES = 4001  # 游戏
+    GAME_SOFTWARE = 4002  # 软件
+    GAME_DLC = 4003  # 扩展包
+    GAME_DEMO = 4004  # 试玩版
+    GAME_TABLE = 4005  # 桌游
+
+    # Real/TV platforms (6000-6099)
+    REAL_TV = 6001  # 电视剧
+    REAL_MOVIE = 6002  # 电影
+    REAL_LIVE = 6003  # 演出
+    REAL_SHOW = 6004  # 综艺
+
+    # Real regions (1-10)
+    REAL_JP = 1  # 日剧
+    REAL_EN = 2  # 欧美剧
+    REAL_CN = 3  # 华语剧
+
+
+class GamePlatform(IntEnum):
+    """Game hardware platforms."""
+
+    PC = 4  # PC
+    NDS = 5  # NDS
+    PSP = 6  # PSP
+    PS2 = 7  # PS2
+    PS3 = 8  # PS3
+    XBOX360 = 9  # Xbox360
+    WII = 10  # Wii
+    IOS = 11  # iOS
+    ARC = 12  # 街机
+    XBOX = 15  # XBOX
+    GAMECUBE = 17  # GameCube
+    NEOGEO_POCKET_COLOR = 18  # NEOGEO Pocket Color
+    SFC = 19  # SFC
+    FC = 20  # FC
+    NINTENDO_64 = 21  # Nintendo 64
+    GBA = 22  # GBA
+    GB = 23  # GB
+    VIRTUAL_BOY = 25  # Virtual Boy
+    WONDERSWAN_COLOR = 26  # WonderSwan Color
+    DREAMCAST = 27  # Dreamcast
+    PLAYSTATION = 28  # PlayStation
+    WONDERSWAN = 29  # WonderSwan
+    PSVITA = 30  # PS Vita
+    NINTENDO_3DS = 31  # 3DS
+    ANDROID = 32  # Android
+    MAC_OS = 33  # Mac OS
+    PS4 = 34  # PS4
+    XBOX_ONE = 35  # Xbox One
+    NINTENDO_SWITCH = 36  # Nintendo Switch
+    WII_U = 37  # Wii U
+    PS5 = 38  # PS5
+    XBOX_SERIES_XS = 39  # Xbox Series X/S
 
 
 class SubjectPersonType:
@@ -397,7 +482,7 @@ class Subject(BaseModel):
     date: str
     favorite: Favorite
     series: bool
-    meta_tags: Optional[str] = None
+    meta_tags: Optional[list[str]] = None
 
 
 class Person(BaseModel):

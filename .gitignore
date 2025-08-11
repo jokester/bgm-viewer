@@ -11,3 +11,4 @@ __pycache__
 __editable__.*
 /uv.lock
 .vscode
+.idea
