@@ -1,5 +1,7 @@
-# bgm-mond
+# bgm-archive
 
-bgm open data for
+Random stuff build around [bangumi-data]()
 
-- index or service for scrapers
+## ES
+
+## 

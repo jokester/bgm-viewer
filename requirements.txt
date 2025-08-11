@@ -1,9 +1,8 @@
 # CLI deps
-tqdm
-
+tqdm==4.67.1
 
 # base deps
-pydantic
+pydantic==2.11.7
 python-dotenv==1.1.1
 
 # notebook + visualization
@@ -26,5 +25,6 @@ pipdeptree==2.28.0
 pytest==8.4.1
 pytest-xdist==3.8.0
 pytest-watcher==0.4.3
-pytest-asyncio==0.26.0
+pytest-asyncio==1.1.0
 pytest-mypy-plugins==3.2.0
+pytest-dotenv==0.5.2

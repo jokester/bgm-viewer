@@ -10,34 +10,18 @@ import os
 import sys
 from pathlib import Path
 
-from bgm_mond.loader.wiki_archive_loader import ArchiveLoader
+from .wiki_archive_loader import WikiArchiveLoader
 
 
-def setup_logging():
-    """Set up logging configuration."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[logging.StreamHandler(sys.stdout)],
-    )
-
-
-def main():
-    """Main function."""
-    setup_logging()
-    logger = logging.getLogger(__name__)
-    
+def test_loader():
     # Get the path to the test archive
     current_dir = Path(__file__).parent
     test_archive_path = current_dir / "__test_data" / "test_archive.zip"
-    
-    if not test_archive_path.exists():
-        logger.error(f"Test archive not found at {test_archive_path}")
-        return
-    
-    logger.info(f"Loading data from {test_archive_path}")
-    loader = ArchiveLoader(str(test_archive_path))
-    
+
+    assert test_archive_path.exists(
+    ), f"Test archive not found at {test_archive_path}"
+    loader = WikiArchiveLoader(str(test_archive_path))
+
     # Test loading each type of data
     test_methods = [
         ("subjects", loader.subjects),
@@ -48,3 +32,10 @@ def main():
         ("subject_persons", loader.subject_persons),
         ("subject_characters", loader.subject_characters),
         ("person_characters", loader.person_characters),
+    ]
+
+    for method_name, method in test_methods:
+        print(f"Testing {method_name}...")
+        entries = list(method())
+        assert entries, f"No entries found for {method_name}"
+        print(f"Found {len(entries)} entries for {method_name}")

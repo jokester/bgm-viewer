@@ -1,39 +1,49 @@
-PYTHON_BIN ?= python3
-CONDA_ENV ?= streamlit_dev_py310
-CONDA_YML ?= conda-py310.yaml
 
-run: deps
-	venv/bin/streamlit run streamlit-concurrency.py --logger.level=INFO # --server.address=0.0.0.0
 
-deps: venv/.deps_installed
+default: deps
+	@echo "deps installed"
+
+
+###
+### SECTION dev scripts
+###
+
+format-py:
+	venv/bin/ruff format src notebooks
+
+test: deps
+	. venv/bin/activate && exec pytest src
+
+test-watch: deps
+	. venv/bin/activate && exec pytest-watcher src
+
+###
+### SECTION deps
+###
+
+PYTHON_VER ?= 3.13
+
+# comma separated packages
+FREEZE_PY_REQ = elasticsearch
+
+REQUIREMENTS = -r requirements.txt --editable .
+
+deps: venv/.deps_installed # .PHONY
 
 venv/.deps_installed: venv requirements.txt
-	venv/bin/pip install -r requirements.txt --editable .
-	touch $@
+	@# the most useful feature of uv
+	UV_PYTHON=venv UV_LINK_MODE=symlink uv pip install $(REQUIREMENTS)
+	@echo "deps installed"
+	@touch $@
 
-test:
-	venv/bin/pytest
-
-format:
-	venv/bin/ruff format .
+upgrade-deps:
+	venv/bin/pur -r requirements.txt --force --skip=$(FREEZE_PY_REQ)
 
 venv: venv/.venv_created
 
-
-# default: create venv with $PYTHON_BIN in $PATH
 venv/.venv_created: Makefile
-	$(PYTHON_BIN) -mvenv ./venv
-	touch $@
+	@# the 2nd most useful feature of uv
+	uv venv --clear --python=$(PYTHON_VER) venv
+	@touch $@
 
-# alt: create venv with conda python 
-conda-venv: .conda_env_created
-	micromamba run --attach '' -n $(CONDA_ENV) $(PYTHON_BIN) -mvenv ./venv
-	touch venv/.venv_created
-
-.conda_env_created: $(CONDA_YML)
-	# setup conda environment AND env-wise deps
-	micromamba env create -n $(CONDA_ENV) --yes -f $(CONDA_YML)
-	touch $@
-
-upgrade-deps:
-	venv/bin/pur -r requirements.txt
+.PHONY:

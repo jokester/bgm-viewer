@@ -47,7 +47,7 @@ class EpisodeType(IntEnum):
     OTHER = 6  # 其他
 
 
-class RelationType(IntEnum):
+class SubjectRelationType(IntEnum):
     """Relation types between subjects."""
 
     # Anime relations (1-99)
@@ -99,13 +99,15 @@ class RelationType(IntEnum):
     GAME_SAME_SETTING = 4008  # Same Setting / 相同世界观
     GAME_ALTERNATIVE_SETTING = 4009  # Alternative Setting / 不同世界观
     GAME_ALTERNATIVE_VERSION = 4010  # Alternative Version / 不同演绎
-    GAME_VERSION = 4011  # Version / 不同版本
+    # GAME_VERSION = 4011  # Version / 不同版本
     GAME_PARENT_STORY = 4012  # Parent Story / 主线故事
-    GAME_MAIN_VERSION = 4013  # Main Version / 主版本
+    # GAME_MAIN_VERSION = 4013  # Main Version / 主版本
     GAME_COLLABORATION = 4014  # Collaboration / 联动
     GAME_DLC = 4015  # DLC / 扩展包
-    GAME_COLLECTION = 4016  # Collection / 合集
-    GAME_IN_COLLECTION = 4017  # In Collection / 收录作品
+    GAME_VERSION = 4016  # Version / 不同版本
+    GAME_MAIN_VERSION = 4017  # Main Version / 主版本
+    GAME_COLLECTION = 4018  # Collection / 合集
+    GAME_IN_COLLECTION = 4019  # In Collection / 收录作品
     GAME_OTHER = 4099  # Other / 其他
 
 
@@ -211,7 +213,8 @@ class SubjectPersonType:
         SOUND_DIRECTOR = 44  # Sound Director / 音响监督
         SOUND = 45  # 音響 音声 / Sound / 音响
         SOUND_EFFECTS = 46  # 音響効果 / Sound Effects / 音效
-        SPECIAL_EFFECTS_ANIMATION_DIRECTION = 88  # エフェクト作画監督 / Special Effects Animation Direction / 特效作画监督
+        # エフェクト作画監督 / Special Effects Animation Direction / 特效作画监督
+        SPECIAL_EFFECTS_ANIMATION_DIRECTION = 88
         SPECIAL_EFFECTS = 47  # 視覚効果 / Special Effects / 特效
         ADR_DIRECTOR = 48  # ADR Director / 配音监督
         CO_DIRECTOR = 49  # Co-Director / 联合导演
@@ -449,7 +452,7 @@ class SubjectRelation(BaseModel):
     model_config = _config
 
     subject_id: int
-    relation_type: RelationType
+    relation_type: SubjectRelationType
     related_subject_id: int
     order: int
 
