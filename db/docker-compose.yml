@@ -1,0 +1,52 @@
+
+# elasticsearch: see https://github.com/memgraph/memgraph-platform/blob/main/docker-compose.yml
+
+name: bgm-archive-deps
+
+x-logging-fluentd: &log_fluentd
+  driver: fluentd
+  options:
+    fluentd-async: 'true'
+    fluentd-address: "127.0.0.1:24224"
+    tag: container-{{.Name}}-{{.ID}}
+
+services:
+  postgres:
+    image: tensorchord/pgvecto-rs:pg17-v0.4.0
+    cpu_count: 2
+    ports:
+      - "20432:5432"
+    env_file:
+      - .env.postgres
+    volumes:
+      - "./pg-data:/var/lib/postgresql/data"
+    restart: unless-stopped
+    logging: *log_fluentd
+    profiles: [DISABLED]
+
+  redis:
+    image: redis:7-bookworm
+    volumes:
+      - "./redis7-data:/data"
+    ports:
+      - 36379:6379
+    restart: unless-stopped
+    logging: *log_fluentd
+    profiles: [DISABLED]
+
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
+    ports:
+      - "9200:9200" # HTTP API
+      - "9300:9300" # Node intercom
+    volumes:
+      - ./data-es:/usr/share/elasticsearch/data:rw
+    env_file: .env.es
+    # environment:
+    #   - http.cors.enabled=true
+    #   - http.cors.allow-origin="*"
+    #   - http.cors.allow-headers='X-Requested-With,Content-Type,Content-Length,Authorization'
+    #   - http.cors.allow-credentials=true
+    restart: unless-stopped
+    logging: *log_fluentd
+

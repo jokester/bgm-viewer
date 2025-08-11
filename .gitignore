@@ -1,5 +1,13 @@
-.conda_env_created
+
 /venv
-*.egg-info
-*.pyc
+.DS_Store
+
+.env
+.env.*
+!.env.*.sample
+
 __pycache__
+*.egg-info
+__editable__.*
+/uv.lock
+.vscode
