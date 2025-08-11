@@ -1,9 +1,11 @@
 import itertools
+import pandas as pd
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, ContextManager, AsyncContextManager
 import duckdb
 from pydantic import BaseModel
 from bgm_archive.loader import WikiArchiveLoader, model
+import contextlib
 
 import logging
 
@@ -11,25 +13,47 @@ logger = logging.getLogger(__name__)
 
 
 class DuckWrapper():
-    def __init__(self, path: str | Path, read_only: bool = True):
-        self._conn = duckdb.connect(str(path), read_only=read_only)
+    def __init__(self, path: str | Path):
+        self._path = Path(path)
+        self._conn: duckdb.DuckDBPyConnection = None  # type: ignore
+
+    def peek_table(self, table_name: str) -> pd.DataFrame:
+        with self.open_db(read_only=True) as conn:
+            result = conn.execute(f"SELECT * FROM {table_name} LIMIT 10").df()
+            return result
+    def count_table(self, table_name: str) -> int:
+        with self.open_db(read_only=True) as conn:
+            result = conn.execute(
+                f"SELECT COUNT(*) FROM {table_name}").fetchone()
+            return result[0] if result else 0
 
     def list_extensions(self) -> duckdb.DuckDBPyConnection:
-        return self._conn.execute("SELECT * FROM duckdb_extensions();")
+        with self.open_db(read_only=True) as conn:
+            return conn.execute("SELECT * FROM duckdb_extensions();")
+
+    def open_db(self, read_only=False) -> ContextManager[duckdb.DuckDBPyConnection]:
+        @contextlib.contextmanager
+        def create():
+            assert self._conn is None, "Connection already open"
+            db = duckdb.connect(self._path, read_only=read_only)
+            self._conn = db
+            yield db  # type: ignore
+            self._conn = None  # type: ignore
+            db.close()
+        return create()
 
 
 class BgmGraph(DuckWrapper):
 
     def setup_db(self):
-        self._conn.install_extension("duckpgq", repository="community")
-        self._conn.load_extension("duckpgq")
-
-    def init_tables(self):
-        self._conn.execute(_CREATE_TABLE_SQL).df()
+        with self.open_db() as conn:
+            conn.install_extension("duckpgq", repository="community")
+            conn.load_extension("duckpgq")
 
     def create_bgm_schema(self):
         """Create the full BGM archive schema"""
-        self._conn.execute(_CREATE_TABLE_SQL)
+        with self.open_db(read_only=False) as conn:
+            conn.execute(_CREATE_TABLE_SQL).fetchall()
 
     def import_all(self, loader: WikiArchiveLoader, *, chunk_size=50000, limit=None, progress_bar=False):
 
@@ -43,36 +67,38 @@ class BgmGraph(DuckWrapper):
                 yield from iterator
         """Import all data from the loader into the database"""
 
-        self.import_subjects(wrap_iterator(loader.subjects()), chunk_size)
+        with self.open_db(read_only=False):
+            self.import_subjects(wrap_iterator(loader.subjects()), chunk_size)
 
-        logger.info("Imported subjects")
+            logger.info("Imported subjects")
 
-        self.import_persons(wrap_iterator(loader.persons()), chunk_size)
-        logger.info("Imported persons")
+            self.import_persons(wrap_iterator(loader.persons()), chunk_size)
+            logger.info("Imported persons")
 
-        self.import_characters(wrap_iterator(loader.characters()), chunk_size)
-        logger.info("Imported characters")
+            self.import_characters(wrap_iterator(
+                loader.characters()), chunk_size)
+            logger.info("Imported characters")
 
-        self.import_episodes(wrap_iterator(loader.episodes()), chunk_size)
-        logger.info("Imported episodes")
+            self.import_episodes(wrap_iterator(loader.episodes()), chunk_size)
+            logger.info("Imported episodes")
 
-        self.import_subject_relations(wrap_iterator(
-            loader.subject_relations()), chunk_size)
-        logger.info("Imported subject relations")
+            self.import_subject_relations(wrap_iterator(
+                loader.subject_relations()), chunk_size)
+            logger.info("Imported subject relations")
 
-        self.import_subject_persons(wrap_iterator(
-            loader.subject_persons()), chunk_size)
-        logger.info("Imported subject persons")
+            self.import_subject_persons(wrap_iterator(
+                loader.subject_persons()), chunk_size)
+            logger.info("Imported subject persons")
 
-        self.import_subject_characters(wrap_iterator(
-            loader.subject_characters()), chunk_size)
-        logger.info("Imported subject characters")
+            self.import_subject_characters(wrap_iterator(
+                loader.subject_characters()), chunk_size)
+            logger.info("Imported subject characters")
 
-        self.import_person_characters(wrap_iterator(
-            loader.person_characters()), chunk_size)
-        logger.info("Imported person characters")
+            self.import_person_characters(wrap_iterator(
+                loader.person_characters()), chunk_size)
+            logger.info("Imported person characters")
 
-    def import_subjects(self, subjects: Iterator[model.Subject], chunk_size=100000):
+    def import_subjects(self, subjects: Iterator[model.Subject], chunk_size=1000):
         for chunk in itertools.batched(subjects, chunk_size):
             self._conn.executemany(
                 """INSERT INTO Subjects
@@ -101,7 +127,7 @@ class BgmGraph(DuckWrapper):
                     for subject in chunk
                 ])
 
-    def import_persons(self, persons: Iterator[model.Person], chunk_size=100000):
+    def import_persons(self, persons: Iterator[model.Person], chunk_size=1000):
         for chunk in itertools.batched(persons, chunk_size):
             self._conn.executemany(
                 """INSERT INTO Persons
@@ -121,7 +147,7 @@ class BgmGraph(DuckWrapper):
                     for person in chunk
                 ])
 
-    def import_characters(self, characters: Iterator[model.Character], chunk_size=100000):
+    def import_characters(self, characters: Iterator[model.Character], chunk_size=1000):
         for chunk in itertools.batched(characters, chunk_size):
             self._conn.executemany(
                 """INSERT INTO Characters
@@ -140,7 +166,7 @@ class BgmGraph(DuckWrapper):
                     for character in chunk
                 ])
 
-    def import_episodes(self, episodes: Iterator[model.Episode], chunk_size=100000):
+    def import_episodes(self, episodes: Iterator[model.Episode], chunk_size=1000):
         for chunk in itertools.batched(episodes, chunk_size):
             self._conn.executemany(
                 """INSERT INTO Episodes
@@ -162,7 +188,7 @@ class BgmGraph(DuckWrapper):
                     for episode in chunk
                 ])
 
-    def import_subject_relations(self, relations: Iterator[model.SubjectRelation], chunk_size=100000):
+    def import_subject_relations(self, relations: Iterator[model.SubjectRelation], chunk_size=1000):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO SubjectRelation
@@ -178,7 +204,7 @@ class BgmGraph(DuckWrapper):
                     for relation in chunk
                 ])
 
-    def import_subject_persons(self, relations: Iterator[model.SubjectPerson], chunk_size=100000):
+    def import_subject_persons(self, relations: Iterator[model.SubjectPerson], chunk_size=1000):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO SubjectPersons
@@ -193,7 +219,7 @@ class BgmGraph(DuckWrapper):
                     for relation in chunk
                 ])
 
-    def import_subject_characters(self, relations: Iterator[model.SubjectCharacter], chunk_size=100000):
+    def import_subject_characters(self, relations: Iterator[model.SubjectCharacter], chunk_size=1000):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO SubjectCharacter
@@ -209,7 +235,7 @@ class BgmGraph(DuckWrapper):
                     for relation in chunk
                 ])
 
-    def import_person_characters(self, relations: Iterator[model.PersonCharacter], chunk_size=100000):
+    def import_person_characters(self, relations: Iterator[model.PersonCharacter], chunk_size=1000):
         for chunk in itertools.batched(relations, chunk_size):
             self._conn.executemany(
                 """INSERT INTO PersonCharacter
@@ -229,7 +255,7 @@ class BgmGraph(DuckWrapper):
 _CREATE_TABLE_SQL = """
 -- node tables
 
-CREATE TABLE Subjects (
+CREATE TABLE IF NOT EXISTS Subjects (
     id INTEGER PRIMARY KEY,
     type INTEGER NOT NULL,
     name VARCHAR NOT NULL,
@@ -251,7 +277,7 @@ CREATE TABLE Subjects (
     collects INTEGER DEFAULT 0
 );
 
-CREATE TABLE Persons (
+CREATE TABLE IF NOT EXISTS Persons (
     id INTEGER PRIMARY KEY,
     name VARCHAR NOT NULL,
     type INTEGER NOT NULL,
@@ -262,7 +288,7 @@ CREATE TABLE Persons (
     collects INTEGER DEFAULT 0
 );
 
-CREATE TABLE Characters (
+CREATE TABLE IF NOT EXISTS Characters (
     id INTEGER PRIMARY KEY,
     role INTEGER NOT NULL,
     name VARCHAR NOT NULL,
@@ -272,7 +298,7 @@ CREATE TABLE Characters (
     collects INTEGER DEFAULT 0
 );
 
-CREATE TABLE Episodes (
+CREATE TABLE IF NOT EXISTS Episodes (
     id INTEGER PRIMARY KEY,
     name VARCHAR NOT NULL,
     name_cn VARCHAR,
@@ -288,7 +314,7 @@ CREATE TABLE Episodes (
 
 -- edge tables
 
-CREATE TABLE SubjectRelation (
+CREATE TABLE IF NOT EXISTS SubjectRelation (
     subject_id INTEGER NOT NULL,
     relation_type INTEGER NOT NULL,
     related_subject_id INTEGER NOT NULL,
@@ -298,7 +324,7 @@ CREATE TABLE SubjectRelation (
     -- FOREIGN KEY (related_subject_id) REFERENCES Subjects(id)
 );
 
-CREATE TABLE SubjectPersons (
+CREATE TABLE IF NOT EXISTS SubjectPersons (
     person_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
     position INTEGER NOT NULL,
@@ -307,7 +333,7 @@ CREATE TABLE SubjectPersons (
     -- FOREIGN KEY (subject_id) REFERENCES Subjects(id)
 );
 
-CREATE TABLE SubjectCharacter (
+CREATE TABLE IF NOT EXISTS SubjectCharacter (
     character_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
     type INTEGER NOT NULL,
@@ -317,7 +343,7 @@ CREATE TABLE SubjectCharacter (
     -- FOREIGN KEY (subject_id) REFERENCES Subjects(id)
 );
 
-CREATE TABLE PersonCharacter (
+CREATE TABLE IF NOT EXISTS PersonCharacter (
     person_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
     character_id INTEGER NOT NULL,
