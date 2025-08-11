@@ -1,4 +1,3 @@
-from turtle import position
 from typing import Iterable
 import click
 import tqdm

@@ -1,8 +1,9 @@
 from enum import Enum, IntEnum
 from typing import Dict, List, Optional, Union
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
-_config = ConfigDict(use_enum_values=True, extra="forbid")
+_config = ConfigDict(use_enum_values=True,
+                     str_strip_whitespace=True, extra="forbid")
 
 
 class SubjectType(IntEnum):
@@ -475,14 +476,22 @@ class Subject(BaseModel):
     platform: int
     summary: str
     nsfw: bool
-    tags: List[Tag] = Field(default_factory=list)
+    tags: list[Tag]
     score: float
     score_details: Optional[ScoreDetails] = None
     rank: int
-    date: str
+    date: str | None
+
     favorite: Favorite
     series: bool
     meta_tags: Optional[list[str]] = None
+
+    @field_validator('date')
+    def strip_date(cls, v: Optional[str]) -> Optional[str]:
+        """Strip whitespace from date."""
+        if v is not None:
+            return v.strip() or None
+        return v
 
 
 class Person(BaseModel):
