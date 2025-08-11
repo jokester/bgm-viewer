@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -ue
+
+REPO_ROOT=$(dirname "$0")
+
+set -x
+
+exec "$REPO_ROOT/venv/bin/python" -m bgm_archive.cli "$@"
