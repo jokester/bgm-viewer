@@ -4,7 +4,7 @@ import tqdm
 import concurrent.futures as cf
 from pathlib import Path
 from collections import Counter
-from ..loader.wiki_archive_loader import WikiArchiveLoader
+from bgm_archive.loader.wiki_archive_loader import WikiArchiveLoader
 
 
 @click.command("validate-archive")

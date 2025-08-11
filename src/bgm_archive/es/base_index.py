@@ -1,10 +1,13 @@
+from pydantic import BaseModel
 from elasticsearch import AsyncElasticsearch
 from typing import Iterable, AsyncIterable
 from elasticsearch.helpers import async_streaming_bulk
+from typing import TypeVar, Generic
+import logging
 
+ModelType = TypeVar("ModelType", bound=BaseModel)
 
-from pydantic import BaseModel
-
+logger = logging.getLogger(__name__)
 
 _analysis = {
     "analysis": {
@@ -20,10 +23,24 @@ _analysis = {
 }
 
 
-class BaseIndex:
-    def __init__(self, es: AsyncElasticsearch, index_name: str):
+class BaseIndex(Generic[ModelType]):
+    def __init__(self, es: AsyncElasticsearch, index_name: str, model_type: ModelType):
         self.__es = es
         self.__index_name = index_name
+        self.__model_type = model_type
+
+    async def get_by_id(self, id: int) -> ModelType | None:
+        response = await self.__es.search(index=self.__index_name, query={"term": {"id": id}})
+        print(response)
+        hits = response.get('hits', {}).get('hits', [])
+        if len(hits) == 0:
+            return None
+        elif len(hits) == 1:
+            return self.__model_type.model_validate(hits[0]['_source'])
+        else:
+            logger.warning(
+                f"Multiple hits found for id {id} in index {self.__index_name} - len(hits)={len(hits)}")
+            return None
 
     async def recreate_index(self):
         await self.__es.indices.delete(index=self.__index_name, ignore_unavailable=True)

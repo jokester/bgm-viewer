@@ -12,3 +12,6 @@ __editable__.*
 /uv.lock
 .vscode
 .idea
+
+*.duckdb
+*.duckdb.wal

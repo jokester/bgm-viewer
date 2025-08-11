@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .normalizer import launder_date
 
-_config = ConfigDict(use_enum_values=True,
+_config = ConfigDict(use_enum_values=False,
                      str_strip_whitespace=True, extra="forbid")
 
 
@@ -120,6 +120,8 @@ class CharacterSubjectType(IntEnum):
     MAIN = 1  # 主角
     SUPPORTING = 2  # 配角
     GUEST = 3  # 客串
+    MOB = 4  # 闲角
+    NARRATOR = 5  # 旁白
 
 
 class PlatformType(IntEnum):
