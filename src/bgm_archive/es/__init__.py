@@ -1,4 +1,10 @@
 from .conn import get_async_client
-from .subjects_index import SubjectsIndex
+from .indexes import SubjectsIndex, PersonIndex, CharacterIndex, EpisodeIndex
 
-__all__ = ['SubjectsIndex', 'get_async_client']
+__all__ = [
+    "SubjectsIndex",
+    "PersonIndex",
+    "CharacterIndex",
+    "EpisodeIndex",
+    "get_async_client",
+]

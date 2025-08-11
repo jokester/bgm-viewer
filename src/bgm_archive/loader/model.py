@@ -1,6 +1,7 @@
 from enum import Enum, IntEnum
 from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
+from .normalizer import launder_date
 
 _config = ConfigDict(use_enum_values=True,
                      str_strip_whitespace=True, extra="forbid")
@@ -488,10 +489,7 @@ class Subject(BaseModel):
 
     @field_validator('date')
     def strip_date(cls, v: Optional[str]) -> Optional[str]:
-        """Strip whitespace from date."""
-        if v is not None:
-            return v.strip() or None
-        return v
+        return launder_date(v)
 
 
 class Person(BaseModel):
@@ -532,12 +530,16 @@ class Episode(BaseModel):
     name: str
     name_cn: str
     description: str
-    airdate: str
+    airdate: str | None = None
     disc: int
     duration: str
     subject_id: int
     sort: int | float
     type: EpisodeType
+
+    @field_validator('airdate')
+    def strip_date(cls, v: Optional[str]) -> Optional[str]:
+        return launder_date(v)
 
 
 class SubjectRelation(BaseModel):

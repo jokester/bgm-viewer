@@ -27,6 +27,7 @@ class BaseIndex:
 
     async def recreate_index(self):
         await self.__es.indices.delete(index=self.__index_name, ignore_unavailable=True)
+        # print("mappings", self.es_mappings)
         await self.__es.indices.create(
             index=self.__index_name,
             body={
@@ -39,7 +40,6 @@ class BaseIndex:
         self, documents: Iterable[BaseModel] | AsyncIterable[BaseModel]
     ):
         if isinstance(documents, AsyncIterable):
-
             async def producer():  # pyright: ignore[reportRedeclaration]
                 async for doc in documents:
                     # print(f"Indexing document: {doc}")
@@ -52,6 +52,7 @@ class BaseIndex:
                     yield {"_index": self.__index_name, **doc.model_dump(mode="json")}
         else:
             raise TypeError("documents must be Iterable or AsyncIterable")
+
         async for succeed, details in async_streaming_bulk(
             client=self.__es,
             actions=producer(),

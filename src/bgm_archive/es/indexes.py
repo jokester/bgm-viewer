@@ -93,3 +93,57 @@ class SubjectsIndex(BaseIndex):
                 }
             }
         }
+
+
+class PersonIndex(BaseIndex):
+    @property
+    def es_mappings(self) -> dict:
+        return {
+            "properties": {
+                "id": {"type": "long"},
+                "name": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "type": {"type": "integer"},
+                "career": {"type": "keyword"},
+                "infobox": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "summary": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "comments": {"type": "integer"},
+                "collects": {"type": "integer"},
+            }
+        }
+
+
+class CharacterIndex(BaseIndex):
+    @property
+    def es_mappings(self) -> dict:
+        return {
+            "properties": {
+                "id": {"type": "long"},
+                "role": {"type": "integer"},
+                "name": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "infobox": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "summary": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "comments": {"type": "integer"},
+                "collects": {"type": "integer"},
+            }
+        }
+
+
+class EpisodeIndex(BaseIndex):
+    @property
+    def es_mappings(self) -> dict:
+        return {
+            "properties": {
+                "id": {"type": "long"},
+                "name": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "name_cn": {"type": "text", "analyzer": "mixed_cjk_english"},
+                "description": {"type": "text", "analyzer": "mixed_cjk_english"},
+                # "airdate": {"type": "date"},
+                # not date: this field has too many malformed dates
+                "airdate": {"type": "text"},
+                "disc": {"type": "integer"},
+                "duration": {"type": "text"},
+                "subject_id": {"type": "long"},
+                "sort": {"type": "float"},
+                "type": {"type": "integer"},
+            }
+        }
