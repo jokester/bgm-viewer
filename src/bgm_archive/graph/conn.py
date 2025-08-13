@@ -44,6 +44,7 @@ class DuckWrapper:
             assert self._conn is None, "Connection already open"
             db = duckdb.connect(self._path, read_only=read_only)
             self._conn = db
+            db.load_extension("duckpgq")
             yield db  # type: ignore
             self._conn = None  # type: ignore
             db.close()
@@ -60,7 +61,8 @@ class BgmGraph(DuckWrapper):
     def create_bgm_schema(self):
         """Create the full BGM archive schema"""
         with self.open_db(read_only=False) as conn:
-            conn.execute(_CREATE_TABLE_SQL).fetchall()
+            conn.execute(_CREATE_TABLE_SQL).fetchone()
+            conn.execute(_CREATE_GRAPH_SQL).fetchone()
 
     def import_all(
         self,
@@ -428,7 +430,33 @@ CREATE TABLE IF NOT EXISTS PersonCharacter(
 """
 
 _CREATE_GRAPH_SQL = """
-CREATE PROPERTY GRAPH bgm_archive
-NODE TABLES(
-)
+CREATE OR REPLACE PROPERTY GRAPH bgm_graph
+-- vertax table: table name becomes label
+VERTEX TABLES (Subjects, Persons, Characters)
+
+EDGE TABLES (
+  SubjectRelation
+    SOURCE KEY (subject_id) REFERENCES Subjects (id)
+    DESTINATION KEY (related_subject_id) REFERENCES Subjects (id)
+    PROPERTIES (relation_type)
+    LABEL s2s,
+
+  PersonCharacter
+    SOURCE KEY (person_id) REFERENCES Persons (id)
+    DESTINATION KEY (character_id) REFERENCES Characters (id)
+    PROPERTIES (summary)
+    LABEL p2c,
+
+  SubjectPersons
+    SOURCE KEY (person_id) REFERENCES Persons (id)
+    DESTINATION KEY (subject_id) REFERENCES Subjects (id)
+    PROPERTIES (position)
+    LABEL s2p,
+
+  SubjectCharacter
+    SOURCE KEY (character_id) REFERENCES Characters (id)
+    DESTINATION KEY (subject_id) REFERENCES Subjects (id)
+    PROPERTIES (type)
+    LABEL s2c
+);
 """
