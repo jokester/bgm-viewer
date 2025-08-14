@@ -1,9 +1,10 @@
 from enum import Enum, IntEnum
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .normalizer import launder_date
 
-_config = ConfigDict(use_enum_values=False, str_strip_whitespace=True, extra="forbid")
+_config = ConfigDict(use_enum_values=False,
+                     str_strip_whitespace=True, extra="forbid")
 
 
 class SubjectType(IntEnum):
@@ -113,7 +114,7 @@ class SubjectRelationType(IntEnum):
     GAME_OTHER = 4099  # Other / 其他
 
 
-class CharacterSubjectType(IntEnum):
+class SubjectCharacterType(IntEnum):
     """Character types in subject-character relationships."""
 
     MAIN = 1  # 主角
@@ -561,7 +562,7 @@ class SubjectCharacter(BaseModel):
 
     character_id: int
     subject_id: int
-    type: CharacterSubjectType
+    type: SubjectCharacterType
     order: int
 
 
@@ -590,3 +591,11 @@ class PersonCharacter(BaseModel):
     subject_id: int
     character_id: int
     summary: str
+
+
+class Entity(BaseModel):
+    type_: Literal["subject", "character", "person"] = Field()
+    """A union"""
+    subject: Subject | None = None
+    character: Character | None = None
+    person: Person | None = None

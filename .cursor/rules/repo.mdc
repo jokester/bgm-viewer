@@ -1,0 +1,7 @@
+---
+description: repo summary
+globs:
+alwaysApply: true
+---
+
+bgm-lens is a project to run data analysis and visualization on Bangumi dataset. Bangumi is a wiki-like community focused on creations like Anime Cartoon Manga Drama Movie. The main entity types in the dataset are Subject, Character, Person, Episode.

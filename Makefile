@@ -1,8 +1,15 @@
-
-
 default: deps
 	@echo "deps installed"
 
+test-db: deps
+	@mkdir -p db
+	@rm -fv db/test.duckdb
+	./cli import-duckdb dataset/dump-2025-06-03.210251Z.zip db/test.duckdb --limit 1000
+
+full-db: deps
+	@mkdir -p db
+	@rm -fv db/full.duckdb
+	./cli import-duckdb dataset/dump-2025-06-03.210251Z.zip db/full.duckdb
 
 ###
 ### SECTION dev scripts
@@ -45,5 +52,6 @@ venv/.venv_created: Makefile
 	@# the 2nd most useful feature of uv
 	uv venv --clear --python=$(PYTHON_VER) venv
 	@touch $@
+	rm -vf venv/.deps_installed
 
 .PHONY:

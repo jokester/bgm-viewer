@@ -1,70 +1,41 @@
 import itertools
 import json
-import pandas as pd
 from pathlib import Path
-from typing import Iterator, ContextManager, cast
-import duckdb
-from pydantic import BaseModel
-from bgm_archive.loader import WikiArchiveLoader, model
-import contextlib
-import tempfile
-
+from typing import Iterator, cast
 import logging
+import tempfile
+import contextlib
+
+from bgm_archive.loader import WikiArchiveLoader, model
+from .conn import DuckDbRef
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
-class DuckWrapper:
-    def __init__(self, path: str | Path):
-        self._path = Path(path)
-        self._conn: duckdb.DuckDBPyConnection = None  # type: ignore
+class DuckdbStorage():
+    def __init__(self, db: DuckDbRef | str | Path):
+        match db:
+            case str():
+                self.__db = DuckDbRef(db)
+            case Path():
+                self.__db = DuckDbRef(db)
+            case DuckDbRef():
+                self.__db = db
+            case _:
+                raise ValueError(f"Invalid database path: {db}")
 
-    def peek_table(self, table_name: str) -> pd.DataFrame:
-        with self.open_db(read_only=True) as conn:
-            result = conn.execute(f"SELECT * FROM {table_name} LIMIT 10").df()
-            return result
+    def open_db(self, read_only=False):
+        return self.__db.open_db(read_only=read_only)
 
-    def count_table(self, table_name: str) -> int:
-        with self.open_db(read_only=True) as conn:
-            result = conn.execute(
-                f"SELECT COUNT(*) FROM {table_name}").fetchone()
-            return result[0] if result else 0
-
-    def list_extensions(self) -> duckdb.DuckDBPyConnection:
-        with self.open_db(read_only=True) as conn:
-            return conn.execute("SELECT * FROM duckdb_extensions();")
-
-    def open_db2(self, read_only=False) -> ContextManager[duckdb.DuckDBPyConnection]:
-        return contextlib.closing(duckdb.connect(self._path, read_only=read_only))
-
-    def open_db(self, read_only=False) -> ContextManager[duckdb.DuckDBPyConnection]:
-        @contextlib.contextmanager
-        def create():
-            assert self._conn is None, "Connection already open"
-            db = duckdb.connect(self._path, read_only=read_only)
-            self._conn = db
-            db.load_extension("duckpgq")
-            yield db  # type: ignore
-            self._conn = None  # type: ignore
-            db.close()
-
-        return create()
-
-
-class BgmGraph(DuckWrapper):
     def setup_db(self):
-        with self.open_db() as conn:
-            conn.install_extension("duckpgq", repository="community")
-            conn.load_extension("duckpgq")
-
-    def create_bgm_schema(self):
         """Create the full BGM archive schema"""
         with self.open_db(read_only=False) as conn:
+            conn.install_extension("duckpgq", repository="community")
+            conn.load_extension("duckpgq")
             conn.execute(_CREATE_TABLE_SQL).fetchone()
             conn.execute(_CREATE_GRAPH_SQL).fetchone()
 
-    def import_all(
+    def load_all(
         self,
         loader: WikiArchiveLoader,
         *,
@@ -430,14 +401,15 @@ CREATE TABLE IF NOT EXISTS PersonCharacter(
 """
 
 _CREATE_GRAPH_SQL = """
-CREATE OR REPLACE PROPERTY GRAPH bgm_graph
--- vertax table: table name becomes label
-VERTEX TABLES (Subjects, Persons, Characters)
+CREATE OR REPLACE PROPERTY GRAPH bgm_graph  
+
+-- vertax table: table name becomes vertex label
+VERTEX TABLES (Subjects, Persons, Characters)  
 
 EDGE TABLES (
   SubjectRelation
     SOURCE KEY (subject_id) REFERENCES Subjects (id)
-    DESTINATION KEY (related_subject_id) REFERENCES Subjects (id)
+    DESTINATION KEY (related_subject_id) REFERENCES Subjects (id)  
     PROPERTIES (relation_type)
     LABEL s2s,
 
