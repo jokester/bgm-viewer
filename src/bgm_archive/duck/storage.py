@@ -14,15 +14,7 @@ logger = logging.getLogger(__name__)
 
 class DuckdbStorage():
     def __init__(self, db: DuckDbRef | str | Path):
-        match db:
-            case str():
-                self.__db = DuckDbRef(db)
-            case Path():
-                self.__db = DuckDbRef(db)
-            case DuckDbRef():
-                self.__db = db
-            case _:
-                raise ValueError(f"Invalid database path: {db}")
+        self.__db = DuckDbRef.from_db(db)
 
     def open_db(self, read_only=False):
         return self.__db.open_db(read_only=read_only)

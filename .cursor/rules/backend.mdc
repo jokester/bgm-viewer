@@ -7,9 +7,11 @@ alwaysApply: false
 The modules in backend are:
 
 ```
-src/cli         CLI scripts
-src/api         FastAPI server
-src/loader      Dataset loader and shared model definitions
-src/es          Provide full text search over the dataset, using ElasticSearch
-src/duckdb      Provide Relational and Graph DB queries over the dataset
+src/cli                 CLI scripts
+src/api                 FastAPI server
+src/loader              Dataset loader and shared model definitions
+src/loader/model.py     Pydantic model of dataset types
+src/es                  Provide full text search over the dataset, using ElasticSearch
+src/duckdb              Provide Relational and Graph DB queries over the dataset, using DuckDB and its DuckPGQ graph database extension
+src/duckdb/storage.py   SQL Table and Graph definitions
 ```
