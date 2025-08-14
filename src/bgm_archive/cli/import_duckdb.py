@@ -6,7 +6,7 @@ from pathlib import Path
 from collections import Counter
 
 from bgm_archive.loader.wiki_archive_loader import WikiArchiveLoader
-from bgm_archive.duckdb import DuckdbStorage
+from bgm_archive.duck import DuckdbStorage
 
 
 @click.command("import-duckdb")

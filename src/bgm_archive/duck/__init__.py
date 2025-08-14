@@ -1,5 +1,5 @@
 from .conn import DuckDbRef
-from .query import DuckdbQuerier
+from .rdb_repo import RdbRepository
 from .storage import DuckdbStorage
 
-__all__ = ["DuckdbStorage", 'DuckdbQuerier', "DuckDbRef"]
+__all__ = ["DuckdbStorage", "RdbRepository", "DuckDbRef"]

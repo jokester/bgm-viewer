@@ -3,8 +3,7 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .normalizer import launder_date
 
-_config = ConfigDict(use_enum_values=False,
-                     str_strip_whitespace=True, extra="forbid")
+_config = ConfigDict(use_enum_values=False, str_strip_whitespace=True, extra="forbid")
 
 
 class SubjectType(IntEnum):

@@ -12,7 +12,7 @@ from .conn import DuckDbRef
 logger = logging.getLogger(__name__)
 
 
-class DuckdbStorage():
+class DuckdbStorage:
     def __init__(self, db: DuckDbRef | str | Path):
         self.__db = DuckDbRef.from_db(db)
 
@@ -53,31 +53,22 @@ class DuckdbStorage():
         self.import_persons(wrap_iterator(loader.persons()))
         logger.info("Imported persons")
 
-        self.import_characters(wrap_iterator(
-            loader.characters()))
+        self.import_characters(wrap_iterator(loader.characters()))
         logger.info("Imported characters")
 
         self.import_episodes(wrap_iterator(loader.episodes()))
         logger.info("Imported episodes")
 
-        self.import_subject_relations(
-            wrap_iterator(loader.subject_relations())
-        )
+        self.import_subject_relations(wrap_iterator(loader.subject_relations()))
         logger.info("Imported subject relations")
 
-        self.import_subject_persons(
-            wrap_iterator(loader.subject_persons())
-        )
+        self.import_subject_persons(wrap_iterator(loader.subject_persons()))
         logger.info("Imported subject persons")
 
-        self.import_subject_characters(
-            wrap_iterator(loader.subject_characters())
-        )
+        self.import_subject_characters(wrap_iterator(loader.subject_characters()))
         logger.info("Imported subject characters")
 
-        self.import_person_characters(
-            wrap_iterator(loader.person_characters())
-        )
+        self.import_person_characters(wrap_iterator(loader.person_characters()))
         logger.info("Imported person characters")
 
     def import_subjects(self, subjects: Iterator[model.Subject]) -> int:
@@ -111,8 +102,7 @@ class DuckdbStorage():
             conn.execute(f"""
             COPY Subjects FROM '{tmp_json}'
                          """)
-            row = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM Subjects").fetchone()
+            row = conn.execute("SELECT COUNT(*) AS cnt FROM Subjects").fetchone()
             cnt = cast(int, row[0])  # type: ignore
             logging.info("Imported %d subjects from %s", cnt, tmp_json)
             return cnt
@@ -165,8 +155,7 @@ class DuckdbStorage():
             COPY Characters FROM '{tmp_json}'
                          """)
             logging.info("Imported characters from %s", tmp_json)
-            (count) = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM Characters").fetchone()
+            (count) = conn.execute("SELECT COUNT(*) AS cnt FROM Characters").fetchone()
             return cast(int, count)
 
     def import_episodes(self, episodes: Iterator[model.Episode]) -> int:
@@ -197,7 +186,9 @@ class DuckdbStorage():
             (count) = conn.execute("SELECT COUNT(*) AS cnt FROM Episodes").fetchone()
             return cast(int, count)
 
-    def import_subject_relations(self, relations: Iterator[model.SubjectRelation]) -> int:
+    def import_subject_relations(
+        self, relations: Iterator[model.SubjectRelation]
+    ) -> int:
         with contextlib.ExitStack() as stack:
             temp_dir = stack.enter_context(tempfile.TemporaryDirectory())
             conn = stack.enter_context(self.open_db(read_only=False))
@@ -217,7 +208,8 @@ class DuckdbStorage():
                          """)
             logging.info("Imported subject relations from %s", tmp_json)
             (count) = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM SubjectRelation").fetchone()
+                "SELECT COUNT(*) AS cnt FROM SubjectRelation"
+            ).fetchone()
             return cast(int, count)
 
     def import_subject_persons(self, relations: Iterator[model.SubjectPerson]) -> int:
@@ -239,10 +231,13 @@ class DuckdbStorage():
                          """)
             logging.info("Imported subject persons from %s", tmp_json)
             (count) = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM SubjectPersons").fetchone()
+                "SELECT COUNT(*) AS cnt FROM SubjectPersons"
+            ).fetchone()
             return cast(int, count)
 
-    def import_subject_characters(self, relations: Iterator[model.SubjectCharacter]) -> int:
+    def import_subject_characters(
+        self, relations: Iterator[model.SubjectCharacter]
+    ) -> int:
         with contextlib.ExitStack() as stack:
             temp_dir = stack.enter_context(tempfile.TemporaryDirectory())
             conn = stack.enter_context(self.open_db(read_only=False))
@@ -262,10 +257,13 @@ class DuckdbStorage():
                          """)
             logging.info("Imported subject characters from %s", tmp_json)
             (count) = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM SubjectCharacter").fetchone()
+                "SELECT COUNT(*) AS cnt FROM SubjectCharacter"
+            ).fetchone()
             return cast(int, count)
 
-    def import_person_characters(self, relations: Iterator[model.PersonCharacter]) -> int:
+    def import_person_characters(
+        self, relations: Iterator[model.PersonCharacter]
+    ) -> int:
         with contextlib.ExitStack() as stack:
             temp_dir = stack.enter_context(tempfile.TemporaryDirectory())
             conn = stack.enter_context(self.open_db(read_only=False))
@@ -285,7 +283,8 @@ class DuckdbStorage():
                          """)
             logging.info("Imported person characters from %s", tmp_json)
             (count) = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM PersonCharacter").fetchone()
+                "SELECT COUNT(*) AS cnt FROM PersonCharacter"
+            ).fetchone()
             return cast(int, count)
 
 

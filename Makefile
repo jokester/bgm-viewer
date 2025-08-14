@@ -1,6 +1,9 @@
 default: deps
 	@echo "deps installed"
 
+fastapi-dev: deps
+	venv/bin/fastapi dev src/bgm_archive/api
+
 test-db: deps
 	@mkdir -p db
 	@rm -fv db/test.duckdb
