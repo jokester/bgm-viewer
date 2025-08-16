@@ -1,8 +1,21 @@
 default: deps
 	@echo "deps installed"
 
+web-dev:
+	pnpm run --filter=./web dev
+
+web-build:
+	pnpm run --filter=./web build
+		
 fastapi-dev: deps
 	venv/bin/fastapi dev src/bgm_archive/api
+
+fastapi-openapi: deps
+	curl http://127.0.0.1:8000/openapi.json -o web/openapi.json
+	pnpm run --filter=./web format openapi.json
+
+fastapi-prod: deps
+	venv/bin/fastapi run src/bgm_archive/api
 
 test-db: deps
 	@mkdir -p db
@@ -17,6 +30,8 @@ full-db: deps
 ###
 ### SECTION dev scripts
 ###
+format-web:
+	pnpm run --filter=./web format
 
 format-py:
 	venv/bin/ruff format src notebooks

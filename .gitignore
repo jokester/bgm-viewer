@@ -15,3 +15,5 @@ __editable__.*
 
 *.duckdb
 *.duckdb.wal
+
+node_modules

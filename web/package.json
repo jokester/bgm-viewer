@@ -1,0 +1,59 @@
+{
+  "name": "@jokester/bgm-archive-viewer",
+  "description": "your next preact spa",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "dprint fmt",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch"
+  },
+  "dependencies": {
+    "@jokester/ts-commonutil": "catalog:deps",
+    "clsx": "catalog:deps-react",
+    "debug": "catalog:deps",
+    "foxact": "catalog:deps-react",
+    "preact": "catalog:deps-react",
+    "preact-router": "catalog:deps-react",
+    "primereact": "^10.9.7"
+  },
+  "devDependencies": {
+    "@eslint-react/eslint-plugin": "catalog:dev-deps",
+    "@eslint/js": "catalog:dev-deps",
+    "@preact/preset-vite": "catalog:dev-deps",
+    "@swc-node/jest": "catalog:dev-deps",
+    "@tsconfig/strictest": "catalog:dev-deps",
+    "@types/debug": "catalog:dev-deps",
+    "@types/jest": "catalog:dev-deps",
+    "@types/node": "catalog:dev-deps",
+    "@types/react": "catalog:dev-deps",
+    "@types/serve-handler": "catalog:dev-deps",
+    "@vitejs/plugin-react": "catalog:dev-deps",
+    "autoprefixer": "catalog:dev-deps",
+    "dprint": "catalog:dev-deps",
+    "eslint": "catalog:dev-deps",
+    "eslint-plugin-import-x": "catalog:dev-deps",
+    "jest": "catalog:dev-deps",
+    "postcss": "catalog:dev-deps",
+    "react": "catalog:deps-react",
+    "react-dom": "catalog:deps-react",
+    "rollup-plugin-visualizer": "catalog:dev-deps",
+    "sass": "catalog:dev-deps",
+    "tailwindcss": "catalog:dev-deps",
+    "tslib": "catalog:dev-deps",
+    "typescript": "catalog:dev-deps",
+    "typescript-eslint": "catalog:dev-deps",
+    "vite": "catalog:dev-deps"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

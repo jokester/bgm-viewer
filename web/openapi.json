@@ -1,0 +1,385 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "FastAPI", "version": "0.1.0" },
+  "paths": {
+    "/subjects/{subject_id}": {
+      "get": {
+        "summary": "Get Subject",
+        "operationId": "get_subject_subjects__subject_id__get",
+        "parameters": [
+          {
+            "name": "subject_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "title": "Subject Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Subject" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/subjects/multiple": {
+      "get": {
+        "summary": "Get Subjects Multiple",
+        "operationId": "get_subjects_multiple_subjects_multiple_get",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Ids" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Subject" },
+                  "title": "Response Get Subjects Multiple Subjects Multiple Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/subjects/{subject_id}/episodes": {
+      "get": {
+        "summary": "Get Subject Episodes",
+        "operationId": "get_subject_episodes_subjects__subject_id__episodes_get",
+        "parameters": [
+          {
+            "name": "subject_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "title": "Subject Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Episode" },
+                  "title": "Response Get Subject Episodes Subjects  Subject Id  Episodes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/characters/{character_id}": {
+      "get": {
+        "summary": "Get Character",
+        "operationId": "get_character_characters__character_id__get",
+        "parameters": [
+          {
+            "name": "character_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "title": "Character Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Character" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/characters/multiple": {
+      "get": {
+        "summary": "Get Characters Multiple",
+        "operationId": "get_characters_multiple_characters_multiple_get",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Ids" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Character" },
+                  "title": "Response Get Characters Multiple Characters Multiple Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/people/{person_id}": {
+      "get": {
+        "summary": "Get Person",
+        "operationId": "get_person_people__person_id__get",
+        "parameters": [
+          { "name": "person_id", "in": "path", "required": true, "schema": { "type": "integer", "title": "Person Id" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Person" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/people/multiple": {
+      "get": {
+        "summary": "Get People Multiple",
+        "operationId": "get_people_multiple_people_multiple_get",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Ids" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Person" },
+                  "title": "Response Get People Multiple People Multiple Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Character": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "role": { "$ref": "#/components/schemas/CharacterRole" },
+          "name": { "type": "string", "title": "Name" },
+          "infobox": { "type": "string", "title": "Infobox" },
+          "summary": { "type": "string", "title": "Summary" },
+          "comments": { "type": "integer", "title": "Comments" },
+          "collects": { "type": "integer", "title": "Collects" }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["id", "role", "name", "infobox", "summary", "comments", "collects"],
+        "title": "Character",
+        "description": "Character model."
+      },
+      "CharacterRole": {
+        "type": "integer",
+        "enum": [1, 2, 3, 4],
+        "title": "CharacterRole",
+        "description": "Character role types in Bangumi."
+      },
+      "Episode": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "name": { "type": "string", "title": "Name" },
+          "name_cn": { "type": "string", "title": "Name Cn" },
+          "description": { "type": "string", "title": "Description" },
+          "airdate": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Airdate" },
+          "disc": { "type": "integer", "title": "Disc" },
+          "duration": { "type": "string", "title": "Duration" },
+          "subject_id": { "type": "integer", "title": "Subject Id" },
+          "sort": { "anyOf": [{ "type": "integer" }, { "type": "number" }], "title": "Sort" },
+          "type": { "$ref": "#/components/schemas/EpisodeType" }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["id", "name", "name_cn", "description", "disc", "duration", "subject_id", "sort", "type"],
+        "title": "Episode",
+        "description": "Episode model."
+      },
+      "EpisodeType": {
+        "type": "integer",
+        "enum": [0, 1, 2, 3, 4, 5, 6],
+        "title": "EpisodeType",
+        "description": "Episode types in Bangumi."
+      },
+      "Favorite": {
+        "properties": {
+          "wish": { "type": "integer", "title": "Wish" },
+          "done": { "type": "integer", "title": "Done" },
+          "doing": { "type": "integer", "title": "Doing" },
+          "on_hold": { "type": "integer", "title": "On Hold" },
+          "dropped": { "type": "integer", "title": "Dropped" }
+        },
+        "type": "object",
+        "required": ["wish", "done", "doing", "on_hold", "dropped"],
+        "title": "Favorite",
+        "description": "Favorite statistics."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": { "items": { "$ref": "#/components/schemas/ValidationError" }, "type": "array", "title": "Detail" }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Person": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "name": { "type": "string", "title": "Name" },
+          "type": { "$ref": "#/components/schemas/PersonType" },
+          "career": { "items": { "type": "string" }, "type": "array", "title": "Career" },
+          "infobox": { "type": "string", "title": "Infobox" },
+          "summary": { "type": "string", "title": "Summary" },
+          "comments": { "type": "integer", "title": "Comments" },
+          "collects": { "type": "integer", "title": "Collects" }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["id", "name", "type", "infobox", "summary", "comments", "collects"],
+        "title": "Person",
+        "description": "Person model (individual, company, association)."
+      },
+      "PersonType": {
+        "type": "integer",
+        "enum": [0, 1, 2, 3],
+        "title": "PersonType",
+        "description": "Person types in Bangumi."
+      },
+      "ScoreDetails": {
+        "properties": {
+          "1": { "type": "integer", "title": "1", "default": 0 },
+          "2": { "type": "integer", "title": "2", "default": 0 },
+          "3": { "type": "integer", "title": "3", "default": 0 },
+          "4": { "type": "integer", "title": "4", "default": 0 },
+          "5": { "type": "integer", "title": "5", "default": 0 },
+          "6": { "type": "integer", "title": "6", "default": 0 },
+          "7": { "type": "integer", "title": "7", "default": 0 },
+          "8": { "type": "integer", "title": "8", "default": 0 },
+          "9": { "type": "integer", "title": "9", "default": 0 },
+          "10": { "type": "integer", "title": "10", "default": 0 }
+        },
+        "type": "object",
+        "title": "ScoreDetails",
+        "description": "Score distribution details."
+      },
+      "Subject": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "type": { "$ref": "#/components/schemas/SubjectType" },
+          "name": { "type": "string", "title": "Name" },
+          "name_cn": { "type": "string", "title": "Name Cn" },
+          "infobox": { "type": "string", "title": "Infobox" },
+          "platform": { "type": "integer", "title": "Platform" },
+          "summary": { "type": "string", "title": "Summary" },
+          "nsfw": { "type": "boolean", "title": "Nsfw" },
+          "tags": { "items": { "$ref": "#/components/schemas/Tag" }, "type": "array", "title": "Tags" },
+          "score": { "type": "number", "title": "Score" },
+          "score_details": { "anyOf": [{ "$ref": "#/components/schemas/ScoreDetails" }, { "type": "null" }] },
+          "rank": { "type": "integer", "title": "Rank" },
+          "date": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Date" },
+          "favorite": { "$ref": "#/components/schemas/Favorite" },
+          "series": { "type": "boolean", "title": "Series" },
+          "meta_tags": {
+            "anyOf": [{ "items": { "type": "string" }, "type": "array" }, { "type": "null" }],
+            "title": "Meta Tags"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "name",
+          "name_cn",
+          "infobox",
+          "platform",
+          "summary",
+          "nsfw",
+          "tags",
+          "score",
+          "rank",
+          "date",
+          "favorite",
+          "series"
+        ],
+        "title": "Subject",
+        "description": "Subject model (anime, book, game, etc.)."
+      },
+      "SubjectType": {
+        "type": "integer",
+        "enum": [1, 2, 3, 4, 6],
+        "title": "SubjectType",
+        "description": "Subject types in Bangumi."
+      },
+      "Tag": {
+        "properties": {
+          "name": { "type": "string", "title": "Name" },
+          "count": { "type": "integer", "title": "Count" }
+        },
+        "type": "object",
+        "required": ["name", "count"],
+        "title": "Tag",
+        "description": "Tag model for subjects."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

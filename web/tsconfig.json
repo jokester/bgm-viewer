@@ -1,0 +1,25 @@
+{
+  "extends": ["@tsconfig/strictest", "./tsconfig.base.json"],
+  "compilerOptions": {
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "target": "esnext",
+    "skipLibCheck": true,
+    "lib": ["dom", "esnext"],
+    "incremental": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mts",
+    "./*.mjs",
+    "./*.js",
+    "./src",
+    "./pages",
+    "./types"
+  ],
+  "exclude": ["build", "src/cidr-editor"]
+}
