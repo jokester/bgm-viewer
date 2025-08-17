@@ -1,13 +1,12 @@
 import { render } from 'preact/compat';
 import Router from 'preact-router';
-import './src/app.scss';
+import './src/app.css';
+// import "primereact/resources/themes/fluent-light/theme.css";
 import debug from 'debug';
 import { NotFoundPage } from './pages/404';
 import { IndexPage } from './pages';
-import { SearchPage } from './pages/search';
+import { SubjectsPage } from './pages/subjects';
 import { PrimeReactProvider } from 'primereact/api';
-// import "primereact/resources/themes/lara-light-cyan/theme.css";
-import "primereact/resources/themes/fluent-light/theme.css";
 
 
 
@@ -20,7 +19,7 @@ function RootRouter() {
     {/* @ts-ignore */}
     <Router>
       <IndexPage path='/' />
-      <SearchPage path='/search' />
+      <SubjectsPage path='/subjects' />
       <NotFoundPage default />
     </Router></PrimeReactProvider>
   );

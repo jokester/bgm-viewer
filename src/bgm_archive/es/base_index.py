@@ -25,31 +25,31 @@ _analysis = {
 
 class BaseIndex(Generic[ModelType]):
     def __init__(self, es: AsyncElasticsearch, index_name: str, model_type: ModelType):
-        self.__es = es
-        self.__index_name = index_name
-        self.__model_type = model_type
+        self._es = es
+        self._index_name = index_name
+        self._model_type = model_type
 
     async def get_by_id(self, id: int) -> ModelType | None:
-        response = await self.__es.search(
-            index=self.__index_name, query={"term": {"id": id}}
+        response = await self._es.search(
+            index=self._index_name, query={"term": {"id": id}}
         )
         print(response)
         hits = response.get("hits", {}).get("hits", [])
         if len(hits) == 0:
             return None
         elif len(hits) == 1:
-            return self.__model_type.model_validate(hits[0]["_source"])
+            return self._model_type.model_validate(hits[0]["_source"])
         else:
             logger.warning(
-                f"Multiple hits found for id {id} in index {self.__index_name} - len(hits)={len(hits)}"
+                f"Multiple hits found for id {id} in index {self._index_name} - len(hits)={len(hits)}"
             )
             return None
 
     async def recreate_index(self):
-        await self.__es.indices.delete(index=self.__index_name, ignore_unavailable=True)
+        await self._es.indices.delete(index=self._index_name, ignore_unavailable=True)
         # print("mappings", self.es_mappings)
-        await self.__es.indices.create(
-            index=self.__index_name,
+        await self._es.indices.create(
+            index=self._index_name,
             body={
                 "settings": {**_analysis},
                 "mappings": self.es_mappings,
@@ -64,18 +64,18 @@ class BaseIndex(Generic[ModelType]):
             async def producer():  # pyright: ignore[reportRedeclaration]
                 async for doc in documents:
                     # print(f"Indexing document: {doc}")
-                    yield {"_index": self.__index_name, **doc.model_dump(mode="json")}
+                    yield {"_index": self._index_name, **doc.model_dump(mode="json")}
         elif isinstance(documents, Iterable):
 
             def producer():
                 for doc in documents:
                     # print(f"Indexing document: {doc}")
-                    yield {"_index": self.__index_name, **doc.model_dump(mode="json")}
+                    yield {"_index": self._index_name, **doc.model_dump(mode="json")}
         else:
             raise TypeError("documents must be Iterable or AsyncIterable")
 
         async for succeed, details in async_streaming_bulk(
-            client=self.__es,
+            client=self._es,
             actions=producer(),
             max_retries=10,
             # raise_on_error=False,

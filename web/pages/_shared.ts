@@ -6,4 +6,6 @@ export interface PageProps<M extends Record<string, string> = Record<never, stri
   url?: string;
 
   matches?: M;
+
+  default?: boolean;
 }

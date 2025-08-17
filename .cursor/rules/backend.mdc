@@ -15,3 +15,5 @@ src/es                  Provide full text search over the dataset, using Elastic
 src/duckdb              Provide Relational and Graph DB queries over the dataset, using DuckDB and its DuckPGQ graph database extension
 src/duckdb/storage.py   SQL Table and Graph definitions
 ```
+
+All deps are installed in `venv/` . So when running tests you should use `venv/bin/python -m pytest` or `venv/bin/pytest` to run the tests.

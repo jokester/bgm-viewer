@@ -1,7 +1,9 @@
 import { useEffect } from 'preact/compat';
 import { useRouter } from 'preact-router';
+import { Layout } from './_layout';
+import { PageProps } from './_shared';
 
-export function NotFoundPage(props: any) {
+export function NotFoundPage(props: PageProps) {
   const [, navigate] = useRouter();
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -11,5 +13,11 @@ export function NotFoundPage(props: any) {
       clearTimeout(timer);
     };
   }, [navigate]);
-  return <div className='container py-8 text-center'>Page not found... You will be redirected in 5s.</div>;
+  return (
+    <Layout path={props.path ?? '/not_found'}>
+      <div className='container py-8 text-center'>
+        Page not found... You will be redirected in 5s.
+      </div>
+    </Layout>
+  );
 }

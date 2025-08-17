@@ -6,7 +6,7 @@ alwaysApply: false
 
 The files in web/ is a web app, the viewer of bgm-archive.
 
-It uses Preact and Preact-router. The main web component library is primereact.
+It uses Preact and Preact-router (basically identical to React). The main web component library is primereact.
 
 The important files you will work on are:
 
@@ -14,6 +14,9 @@ The important files you will work on are:
 web/main.tsx : the bundle entrypoint, importing page components and mount at router.
 web/pages : the page components
 web/src : everything else
+web/src/api/index.ts : API client (components should summon API with `useBgmApi()` hook)
 ```
+
+All the dependencies you should use are already installed and configured. If you are sure some new dependency is required, please report to human and stop.
 
 The web viewer is based on the backend API in the same repository, whose OpenAPI definition can be found at `web/openapi.json`

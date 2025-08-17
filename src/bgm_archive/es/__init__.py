@@ -1,8 +1,12 @@
 from .conn import get_async_client
-from .indexes import SubjectsIndex, PersonIndex, CharacterIndex, EpisodeIndex
+from .subject_index import SubjectsIndex, SubjectsIndexQuery
+from .person_index import PersonIndex
+from .character_index import CharacterIndex
+from .episode_index import EpisodeIndex
 
 __all__ = [
     "SubjectsIndex",
+    "SubjectsIndexQuery",
     "PersonIndex",
     "CharacterIndex",
     "EpisodeIndex",

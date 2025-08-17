@@ -1,9 +1,11 @@
 import os
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 import dotenv
 
 from bgm_archive.duck import RdbRepository
+from bgm_archive.es import SubjectsIndex, SubjectsIndexQuery, get_async_client
 import bgm_archive.loader.model as m
 
 dotenv.load_dotenv()
@@ -25,6 +27,27 @@ def parse_ids(ids_param: str | None) -> list[int]:
 
 def build_app() -> FastAPI:
     fastapi = FastAPI()
+
+    # Add CORS middleware to allow any CORS requests
+    fastapi.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Allow all origins
+        allow_credentials=True,
+        allow_methods=["*"],  # Allow all methods
+        allow_headers=["*"],  # Allow all headers
+    )
+
+    es_client = get_async_client()
+    subjects_index = SubjectsIndex(es_client, "bgm_subjects")
+
+    @fastapi.post("/subjects/search", response_model=list[m.Subject])
+    async def search_subjects(search_query: SubjectsIndexQuery):
+        """Search subjects using Elasticsearch."""
+        try:
+            results = await subjects_index.search(search_query)
+            return results
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.get("/subjects/{subject_id}", response_model=m.Subject)
     def get_subject(subject_id: int):

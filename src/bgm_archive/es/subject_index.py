@@ -1,15 +1,81 @@
 from pydantic import BaseModel
+from typing import Optional
+import logging
 from .base_index import BaseIndex
 from bgm_archive.loader import model
 
+logger = logging.getLogger(__name__)
+
 
 class SubjectsIndexQuery(BaseModel):
-    pass
+    query: str
+    limit: int = 20
+    offset: int = 0
+    subject_type: Optional[int] = None
+    nsfw: Optional[bool] = None
 
 
-class SubjectsIndex(BaseIndex):
+class SubjectsIndex(BaseIndex[model.Subject]):
     def __init__(self, es, index_name: str):
         super().__init__(es, index_name, model.Subject)
+
+    async def search(self, search_query: SubjectsIndexQuery) -> list[model.Subject]:
+        """Search subjects using Elasticsearch."""
+        query_body = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "multi_match": {
+                                "query": search_query.query,
+                                "fields": [
+                                    "name^3",
+                                    "name_cn^3",
+                                    "summary^2",
+                                    "infobox^1",
+                                    "tags.name^2",
+                                ],
+                                "type": "best_fields",
+                                "fuzziness": "AUTO",
+                            }
+                        }
+                    ],
+                    "filter": [],
+                }
+            },
+            "size": search_query.limit,
+            "from": search_query.offset,
+            "sort": [
+                {"_score": {"order": "desc"}},
+                {"score": {"order": "desc"}},
+                {"rank": {"order": "asc"}},
+            ],
+        }
+
+        # Add filters if specified
+        if search_query.subject_type is not None:
+            query_body["query"]["bool"]["filter"].append(
+                {"term": {"type": search_query.subject_type}}
+            )
+
+        if search_query.nsfw is not None:
+            query_body["query"]["bool"]["filter"].append(
+                {"term": {"nsfw": search_query.nsfw}}
+            )
+
+        response = await self._es.search(index=self._index_name, body=query_body)
+
+        hits = response.get("hits", {}).get("hits", [])
+        subjects = []
+        for hit in hits:
+            try:
+                subject = self._model_type.model_validate(hit["_source"])
+                subjects.append(subject)
+            except Exception as e:
+                logger.warning(f"Failed to parse subject from search result: {e}")
+                continue
+
+        return subjects
 
     @property
     def es_mappings(self) -> dict:
@@ -75,68 +141,5 @@ class SubjectsIndex(BaseIndex):
                 },
                 "series": {"type": "boolean"},
                 "meta_tags": {"type": "keyword"},
-            }
-        }
-
-
-class PersonIndex(BaseIndex):
-    def __init__(self, es, index_name: str):
-        super().__init__(es, index_name, model.Person)
-
-    @property
-    def es_mappings(self) -> dict:
-        return {
-            "properties": {
-                "id": {"type": "long"},
-                "name": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "type": {"type": "integer"},
-                "career": {"type": "keyword"},
-                "infobox": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "summary": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "comments": {"type": "integer"},
-                "collects": {"type": "integer"},
-            }
-        }
-
-
-class CharacterIndex(BaseIndex):
-    def __init__(self, es, index_name: str):
-        super().__init__(es, index_name, model.Character)
-
-    @property
-    def es_mappings(self) -> dict:
-        return {
-            "properties": {
-                "id": {"type": "long"},
-                "role": {"type": "integer"},
-                "name": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "infobox": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "summary": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "comments": {"type": "integer"},
-                "collects": {"type": "integer"},
-            }
-        }
-
-
-class EpisodeIndex(BaseIndex):
-    def __init__(self, es, index_name: str):
-        super().__init__(es, index_name, model.Episode)
-
-    @property
-    def es_mappings(self) -> dict:
-        return {
-            "properties": {
-                "id": {"type": "long"},
-                "name": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "name_cn": {"type": "text", "analyzer": "mixed_cjk_english"},
-                "description": {"type": "text", "analyzer": "mixed_cjk_english"},
-                # "airdate": {"type": "date"},
-                # not date: this field has too many malformed dates
-                "airdate": {"type": "text"},
-                "disc": {"type": "integer"},
-                "duration": {"type": "text"},
-                "subject_id": {"type": "long"},
-                "sort": {"type": "float"},
-                "type": {"type": "integer"},
             }
         }
