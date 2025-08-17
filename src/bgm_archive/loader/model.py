@@ -592,7 +592,7 @@ class SubjectPerson(BaseModel):
 
 
 class PersonCharacter(BaseModel):
-    """Relation between person and character."""
+    """Relation per (person_id, character_id, subject_id)."""
 
     model_config = _config
 

@@ -59,16 +59,19 @@ class DuckdbStorage:
         self.import_episodes(wrap_iterator(loader.episodes()))
         logger.info("Imported episodes")
 
-        self.import_subject_relations(wrap_iterator(loader.subject_relations()))
+        self.import_subject_relations(
+            wrap_iterator(loader.subject_relations()))
         logger.info("Imported subject relations")
 
         self.import_subject_persons(wrap_iterator(loader.subject_persons()))
         logger.info("Imported subject persons")
 
-        self.import_subject_characters(wrap_iterator(loader.subject_characters()))
+        self.import_subject_characters(
+            wrap_iterator(loader.subject_characters()))
         logger.info("Imported subject characters")
 
-        self.import_person_characters(wrap_iterator(loader.person_characters()))
+        self.import_person_characters(
+            wrap_iterator(loader.person_characters()))
         logger.info("Imported person characters")
 
     def import_subjects(self, subjects: Iterator[model.Subject]) -> int:
@@ -102,7 +105,8 @@ class DuckdbStorage:
             conn.execute(f"""
             COPY Subjects FROM '{tmp_json}'
                          """)
-            row = conn.execute("SELECT COUNT(*) AS cnt FROM Subjects").fetchone()
+            row = conn.execute(
+                "SELECT COUNT(*) AS cnt FROM Subjects").fetchone()
             cnt = cast(int, row[0])  # type: ignore
             logging.info("Imported %d subjects from %s", cnt, tmp_json)
             return cnt
@@ -155,7 +159,8 @@ class DuckdbStorage:
             COPY Characters FROM '{tmp_json}'
                          """)
             logging.info("Imported characters from %s", tmp_json)
-            (count) = conn.execute("SELECT COUNT(*) AS cnt FROM Characters").fetchone()
+            (count) = conn.execute(
+                "SELECT COUNT(*) AS cnt FROM Characters").fetchone()
             return cast(int, count)
 
     def import_episodes(self, episodes: Iterator[model.Episode]) -> int:
@@ -407,8 +412,8 @@ EDGE TABLES (
   PersonCharacter
     SOURCE KEY (person_id) REFERENCES Persons (id)
     DESTINATION KEY (character_id) REFERENCES Characters (id)
-    PROPERTIES (summary)
-    LABEL p2c,
+    PROPERTIES (subject_id, summary)
+    LABEL p2sc,
 
   SubjectPersons
     SOURCE KEY (person_id) REFERENCES Persons (id)

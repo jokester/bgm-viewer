@@ -1,21 +1,33 @@
 import os
+from typing import Callable
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import dotenv
+import concurrent.futures as cf
 
-from bgm_archive.duck import RdbRepository
+from bgm_archive.duck import RdbRepository, GraphEdge, Subgraph, GraphRepository
 from bgm_archive.es import (
     SubjectsIndex, SubjectsIndexQuery, SubjectSearchResult,
-    CharactersIndexQuery, CharacterSearchResult, PersonsIndexQuery, PersonSearchResult, 
+    CharactersIndexQuery, CharacterSearchResult, PersonsIndexQuery, PersonSearchResult,
     EpisodesIndexQuery, EpisodeSearchResult,
     get_async_client, CharacterIndex, PersonIndex, EpisodeIndex
 )
 import bgm_archive.loader.model as m
+import asyncio
 
 dotenv.load_dotenv()
 
 rdb = RdbRepository(db=os.environ["DUCKDB_PATH"])
+gdb = GraphRepository(db=os.environ["DUCKDB_PATH"], rdb=rdb)
+
+thread_pool = cf.ThreadPoolExecutor(
+    max_workers=int(os.environ.get("THREAD_POOL_SIZE", 10))
+)
+
+
+def in_thread(foo: Callable) -> asyncio.Future:
+    return asyncio.wrap_future(thread_pool.submit(foo))
 
 
 def parse_ids(ids_param: str | None) -> list[int]:
@@ -104,6 +116,18 @@ def build_app() -> FastAPI:
     def get_subject_episodes(subject_id: int):
         return rdb.find_episodes_by_subject_id(subject_id)
 
+    @fastapi.get("/subjects/{subject_id}/edges", response_model=Subgraph)
+    async def get_subject_edges(subject_id: int):
+        subject = rdb.find_subject_by_id(subject_id)
+        if subject is None:
+            raise HTTPException(status_code=404, detail="Subject not found")
+        s2s_edges, s2c_edges, s2p_edges = await asyncio.gather(
+            in_thread(lambda: gdb.expand_s2s(subject)),
+            in_thread(lambda: gdb.expand_s2c(subject)),
+            in_thread(lambda: gdb.expand_s2p(subject))
+        )
+        return Subgraph(from_subject=subject, edges=s2s_edges + s2c_edges + s2p_edges)
+
     @fastapi.get("/characters/{character_id}", response_model=m.Character)
     def get_character(character_id: int):
         character = rdb.find_character_by_id(character_id)
@@ -116,6 +140,17 @@ def build_app() -> FastAPI:
         character_ids = parse_ids(ids)
         return rdb.find_characters_by_ids(character_ids)
 
+    @fastapi.get("/characters/{character_id}/edges", response_model=Subgraph)
+    async def get_character_edges(character_id: int):
+        character = rdb.find_character_by_id(character_id)
+        if character is None:
+            raise HTTPException(status_code=404, detail="Character not found")
+        c2s_edges, c2p_edges = await asyncio.gather(
+            in_thread(lambda: gdb.expand_c2s(character)),
+            in_thread(lambda: gdb.expand_c2p(character))
+        )
+        return Subgraph(from_character=character, edges=c2p_edges)
+
     @fastapi.get("/people/{person_id}", response_model=m.Person)
     def get_person(person_id: int):
         person = rdb.find_person_by_id(person_id)
@@ -127,6 +162,15 @@ def build_app() -> FastAPI:
     def get_people_multiple(ids: str | None = Query(default=None)):
         person_ids = parse_ids(ids)
         return rdb.find_people_by_ids(person_ids)
+
+    @fastapi.get("/people/{person_id}/edges", response_model=Subgraph)
+    async def get_person_edges(person_id: int):
+        person = rdb.find_person_by_id(person_id)
+        if person is None:
+            raise HTTPException(status_code=404, detail="Person not found")
+        p2s_edges, p2c_edges = await asyncio.gather(in_thread(lambda: gdb.expand_p2s(person)),
+                                                    in_thread(lambda: gdb.expand_p2c(person)))
+        return Subgraph(from_person=person, edges=p2s_edges + p2c_edges)
 
     return fastapi
 
