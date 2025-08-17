@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Person, PersonType, PeopleIndexQuery, PersonSearchResult } from '../data/api';
+import { Person, PersonType, PersonsIndexQuery, PersonSearchResult } from '../data/api';
 import { useBgmApi } from '../data';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -78,7 +78,7 @@ export const SearchPerson = () => {
     setCurrentPage(page);
 
     try {
-      const searchParams: PeopleIndexQuery = {
+      const searchParams: PersonsIndexQuery = {
         query: searchQuery.trim(),
         limit: pageSize,
         offset: page * pageSize,
@@ -87,7 +87,7 @@ export const SearchPerson = () => {
       };
 
       const searchResults = await api.searchPeople(searchParams);
-      setResults(searchResults.persons);
+      setResults(searchResults.items);
       setTotalResults(searchResults.total);
       
       setHasSearched(true);

@@ -71,14 +71,14 @@ class PersonIndex(BaseIndex[model.Person]):
 
         hits = response.get("hits", {}).get("hits", [])
         total = response.get("hits", {}).get("total", {}).get("value", 0)
+        
         persons = []
         for hit in hits:
             try:
                 person = self._model_type.model_validate(hit["_source"])
                 persons.append(person)
             except Exception as e:
-                logger.warning(
-                    f"Failed to parse person from search result: {e}")
+                logger.warning(f"Failed to parse person from search result: {e}")
                 continue
 
         has_more = (search_query.offset + search_query.limit) < total

@@ -11,7 +11,8 @@ class SubjectsIndexQuery(BaseModel):
     query: str
     limit: int = 20
     offset: int = 0
-    subject_type: Optional[int] = None
+    type: Optional[int] = None
+    subject_type: Optional[int] = None  # Alias for type field
     nsfw: Optional[bool] = None
 
 
@@ -58,11 +59,18 @@ class SubjectsIndex(BaseIndex[model.Subject]):
         }
 
         # Add filters if specified
+        if search_query.type is not None:
+            query_body["query"]["bool"]["filter"].append(
+                {"term": {"type": search_query.type}}
+            )
+        
+        # Handle subject_type alias for type field
         if search_query.subject_type is not None:
             query_body["query"]["bool"]["filter"].append(
                 {"term": {"type": search_query.subject_type}}
             )
-
+            
+        # Add NSFW filter if specified
         if search_query.nsfw is not None:
             query_body["query"]["bool"]["filter"].append(
                 {"term": {"nsfw": search_query.nsfw}}

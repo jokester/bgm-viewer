@@ -3,7 +3,8 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .normalizer import launder_date
 
-_config = ConfigDict(use_enum_values=False, str_strip_whitespace=True, extra="forbid")
+_config = ConfigDict(use_enum_values=False,
+                     str_strip_whitespace=True, extra="forbid")
 
 
 class SubjectType(IntEnum):
@@ -208,6 +209,15 @@ class GamePlatform(IntEnum):
 
 
 class SubjectPersonType:
+    @classmethod
+    def from_value(cls, value: int) -> 'AnimeStuff | BookStaff | GameStaff | MusicStaff | RealStaff | None':
+        for con in (SubjectPersonType.AnimeStuff, SubjectPersonType.BookStaff, SubjectPersonType.GameStaff, SubjectPersonType.MusicStaff, SubjectPersonType.RealStaff):
+            try:
+                return con(value)
+            except ValueError:
+                continue
+        raise ValueError(f"Invalid value {value} for {cls.__name__}")
+
     class AnimeStuff(IntEnum):
         ORIGINAL_CREATOR = 1  # Original Creator / Original Work / 原作
         CHIEF_DIRECTOR = 74  # 総監督 / Chief Director / 总导演

@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List
+from typing import Generic, TypeVar, List, Any
 from pydantic import BaseModel
 from elasticsearch import AsyncElasticsearch
 from typing import Iterable, AsyncIterable
 from elasticsearch.helpers import async_streaming_bulk
 import logging
 
-T = TypeVar('T')
+T = TypeVar('T', bound=BaseModel)
+
 
 class SearchResult(BaseModel, Generic[T]):
     """Base result model for search operations."""
@@ -16,6 +17,7 @@ class SearchResult(BaseModel, Generic[T]):
     limit: int
     offset: int
     has_more: bool
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +37,7 @@ _analysis = {
 
 class BaseIndex(ABC, Generic[T]):
     """Base class for Elasticsearch indexes."""
-    
+
     def __init__(self, es: AsyncElasticsearch, index_name: str, model_type: type[T]):
         self._es = es
         self._index_name = index_name
@@ -96,7 +98,7 @@ class BaseIndex(ABC, Generic[T]):
                 print(f"Failed to index document: {details}")
 
     @abstractmethod
-    async def search(self, search_query) -> SearchResult[T]:
+    async def search(self, search_query) -> Any:
         """Search using Elasticsearch."""
         pass
 

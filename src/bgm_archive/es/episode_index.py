@@ -69,6 +69,7 @@ class EpisodeIndex(BaseIndex[model.Episode]):
 
         hits = response.get("hits", {}).get("hits", [])
         total = response.get("hits", {}).get("total", {}).get("value", 0)
+        
         episodes = []
         for hit in hits:
             try:

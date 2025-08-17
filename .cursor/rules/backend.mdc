@@ -13,7 +13,9 @@ src/loader              Dataset loader and shared model definitions
 src/loader/model.py     Pydantic model of dataset types
 src/es                  Provide full text search over the dataset, using ElasticSearch
 src/duckdb              Provide Relational and Graph DB queries over the dataset, using DuckDB and its DuckPGQ graph database extension
-src/duckdb/storage.py   SQL Table and Graph definitions
+src/duckdb/storage.py   SQL Table and Vertex-Edge Graph definitions
 ```
+
+One uncommon tech used here is the graph database using duckdb DuckPGQ extension. If you are unsure how to use please refer to src/duckdb/graph_repo.py , or context7 MCP server.
 
 All deps are installed in `venv/` . So when running tests you should use `venv/bin/python -m pytest` or `venv/bin/pytest` to run the tests.

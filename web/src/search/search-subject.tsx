@@ -82,7 +82,7 @@ export const SearchSubject = () => {
       };
 
       const searchResults = await api.searchSubjects(searchParams);
-      setResults(searchResults.subjects);
+      setResults(searchResults.items);
       setTotalResults(searchResults.total);
       
       setHasSearched(true);

@@ -13,8 +13,8 @@ class GraphEdge(BaseModel):
     to_person: m.Person | None = None
 
     s2s_relation_type: m.SubjectRelationType | None = None
-    p2c_summary: m.SubjectPerson | None = None
-    s2p_position: m.SubjectPersonType | None = None
+    p2c_summary: str | None = None
+    s2p_position: m.SubjectPersonType.AnimeStuff | m.SubjectPersonType.BookStaff | m.SubjectPersonType.GameStaff | m.SubjectPersonType.MusicStaff | m.SubjectPersonType.RealStaff | None = None
     s2c_type: m.SubjectCharacterType | None = None
 
 

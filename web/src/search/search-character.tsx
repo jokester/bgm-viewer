@@ -23,11 +23,11 @@ export const SearchCharacter = () => {
   const pageSize = 20;
 
   const characterRoleOptions = [
-    { label: 'All Roles', value: null },
-    { label: 'Main Character', value: CharacterRole.MAIN },
-    { label: 'Supporting Character', value: CharacterRole.SUPPORTING },
-    { label: 'Minor Character', value: CharacterRole.MINOR },
-    { label: 'Guest Character', value: CharacterRole.GUEST },
+    { label: '所有角色', value: null },
+    { label: '主角', value: CharacterRole.MAIN },
+    { label: '配角', value: CharacterRole.SUPPORTING },
+    { label: '次要角色', value: CharacterRole.MINOR },
+    { label: '客串角色', value: CharacterRole.GUEST },
   ];
 
   // Debounced search function
@@ -55,7 +55,7 @@ export const SearchCharacter = () => {
 
   const performSearch = async (page: number = 0) => {
     if (!searchQuery.trim()) {
-      setError('Please enter a search query');
+      setError('请输入搜索关键词');
       return;
     }
 
@@ -72,13 +72,13 @@ export const SearchCharacter = () => {
       };
 
       const searchResults = await api.searchCharacters(searchParams);
-      setResults(searchResults.characters);
+      setResults(searchResults.items);
       setTotalResults(searchResults.total);
       
       setHasSearched(true);
     } catch (err) {
       console.error('Search error:', err);
-      setError(err instanceof Error ? err.message : 'Search failed. Please try again.');
+      setError(err instanceof Error ? err.message : '搜索失败，请重试。');
       setResults([]);
       setTotalResults(0);
     } finally {
@@ -121,11 +121,11 @@ export const SearchCharacter = () => {
 
   const formatCharacterRole = (role: number): string => {
     switch (role) {
-      case CharacterRole.MAIN: return 'Main Character';
-      case CharacterRole.SUPPORTING: return 'Supporting Character';
-      case CharacterRole.MINOR: return 'Minor Character';
-      case CharacterRole.GUEST: return 'Guest Character';
-      default: return 'Unknown';
+      case CharacterRole.MAIN: return '主角';
+      case CharacterRole.SUPPORTING: return '配角';
+      case CharacterRole.MINOR: return '次要角色';
+      case CharacterRole.GUEST: return '客串角色';
+      default: return '未知';
     }
   };
 
@@ -136,19 +136,19 @@ export const SearchCharacter = () => {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Search Characters</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">角色搜索</h1>
       
       {/* Search Form */}
       <Card className="mb-6">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">Search Criteria</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">搜索条件</h2>
           <p className="text-sm text-gray-600 mb-3">
-            Search across character names, summaries, and infobox information. Type at least 2 characters to start searching.
+            搜索角色名称、简介和资料框信息。输入至少2个字符开始搜索。
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2">
               <label htmlFor="searchQuery" className="block text-sm font-medium text-gray-700 mb-2">
-                Search Query
+                搜索关键词
               </label>
               <div className="relative">
                 <InputText
@@ -156,7 +156,7 @@ export const SearchCharacter = () => {
                   value={searchQuery}
                   onChange={(e) => handleQueryChange(e.target.value)}
                   onKeyUp={handleKeyPress}
-                  placeholder="Search by character name, summary, infobox..."
+                  placeholder="按角色名称、简介、资料框搜索..."
                   className="w-full"
                 />
                 {loading && (
@@ -174,7 +174,7 @@ export const SearchCharacter = () => {
             
             <div>
               <label htmlFor="characterRole" className="block text-sm font-medium text-gray-700 mb-2">
-                Character Role
+                角色类型
               </label>
               <Dropdown
                 id="characterRole"
@@ -186,7 +186,7 @@ export const SearchCharacter = () => {
                 options={characterRoleOptions}
                 optionLabel="label"
                 optionValue="value"
-                placeholder="Select role"
+                placeholder="选择角色类型"
                 className="w-full"
               />
             </div>
@@ -195,7 +195,7 @@ export const SearchCharacter = () => {
         
         <div className="flex justify-center gap-3">
           <Button
-            label={loading ? "Searching..." : "Search"}
+            label={loading ? "搜索中..." : "搜索"}
             icon={loading ? "pi pi-spinner" : "pi pi-search"}
             onClick={handleSearch}
             disabled={loading || !searchQuery.trim()}
@@ -204,7 +204,7 @@ export const SearchCharacter = () => {
           />
           {hasSearched && (
             <Button
-              label="Clear"
+              label="清除"
               icon="pi pi-times"
               onClick={() => {
                 setSearchQuery('');
@@ -232,7 +232,7 @@ export const SearchCharacter = () => {
       {loading && (
         <div className="flex justify-center items-center py-8">
           <ProgressSpinner />
-          <span className="ml-3 text-gray-600">Searching...</span>
+          <span className="ml-3 text-gray-600">搜索中...</span>
         </div>
       )}
 
@@ -243,15 +243,15 @@ export const SearchCharacter = () => {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-blue-800">Search Query: "{searchQuery}"</h3>
+                <h3 className="text-sm font-medium text-blue-800">搜索关键词: "{searchQuery}"</h3>
                 <div className="flex items-center gap-4 mt-1 text-xs text-blue-600">
                   {selectedRole !== null && (
-                    <span>Role: {characterRoleOptions.find(opt => opt.value === selectedRole)?.label}</span>
+                    <span>角色类型: {characterRoleOptions.find(opt => opt.value === selectedRole)?.label}</span>
                   )}
                 </div>
               </div>
               <Button
-                label="Modify Search"
+                label="修改搜索"
                 icon="pi pi-pencil"
                 size="small"
                 severity="secondary"
@@ -268,10 +268,10 @@ export const SearchCharacter = () => {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-xl font-semibold text-gray-800">
-                Search Results
+                搜索结果
               </h2>
               <p className="text-sm text-gray-600">
-                Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalResults)} of approximately {totalResults} results
+                显示第 {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalResults)} 条，共约 {totalResults} 条结果
               </p>
             </div>
             {totalResults > pageSize && (
@@ -289,11 +289,11 @@ export const SearchCharacter = () => {
           {results.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <i className="pi pi-search text-4xl mb-4 block"></i>
-              <p>No results found for "{searchQuery}"</p>
-              <p className="text-sm">Try adjusting your search terms or filters</p>
+              <p>未找到 "{searchQuery}" 的相关结果</p>
+              <p className="text-sm">请尝试调整搜索关键词或筛选条件</p>
               <div className="mt-4">
                 <Button
-                  label="Try Different Search"
+                  label="尝试其他搜索"
                   icon="pi pi-refresh"
                   onClick={() => {
                     setSearchQuery('');
@@ -312,38 +312,53 @@ export const SearchCharacter = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.map((character) => (
                 <Card key={character.id} className="hover:shadow-lg transition-shadow">
+                  {/* Role Label */}
                   <div className="flex items-start justify-between mb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       {formatCharacterRole(character.role)}
                     </span>
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 overflow-hidden">
-                    {character.name}
-                  </h3>
+                  {/* Character Name */}
+                  <div className="mb-2">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">角色名称</label>
+                    <h3 className="text-lg font-semibold text-gray-800 overflow-hidden">
+                      {character.name}
+                    </h3>
+                  </div>
                   
+                  {/* Character Summary */}
                   {character.summary && (
-                    <p className="text-sm text-gray-700 mb-3 overflow-hidden">
-                      {truncateText(character.summary)}
-                    </p>
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-500 mb-1">角色简介</label>
+                      <p className="text-sm text-gray-700 overflow-hidden">
+                        {truncateText(character.summary)}
+                      </p>
+                    </div>
                   )}
                   
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <i className="pi pi-comment text-blue-500 mr-1"></i>
-                      <span>{character.comments}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <i className="pi pi-heart text-red-500 mr-1"></i>
-                      <span>{character.collects}</span>
+                  {/* Statistics */}
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-gray-500 mb-2">统计信息</label>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <i className="pi pi-comment text-blue-500 mr-1"></i>
+                        <span>评论: {character.comments}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="pi pi-heart text-red-500 mr-1"></i>
+                        <span>收藏: {character.collects}</span>
+                      </div>
                     </div>
                   </div>
                   
+                  {/* Infobox */}
                   {character.infobox && (
                     <div className="mt-3">
+                      <label className="block text-xs font-medium text-gray-500 mb-1">资料框</label>
                       <details className="text-xs">
                         <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
-                          Show infobox details
+                          显示详细资料
                         </summary>
                         <div className="mt-2 p-2 bg-gray-50 rounded text-gray-700 whitespace-pre-wrap">
                           {truncateText(character.infobox, 200)}
@@ -362,8 +377,8 @@ export const SearchCharacter = () => {
       {!loading && !hasSearched && (
         <div className="text-center py-12 text-gray-500">
           <i className="pi pi-user text-6xl mb-4 block"></i>
-          <h2 className="text-xl font-semibold mb-2">Start Your Character Search</h2>
-          <p>Enter a search query above to find characters in the Bangumi archive</p>
+          <h2 className="text-xl font-semibold mb-2">开始角色搜索</h2>
+          <p>在上方输入搜索关键词，在Bangumi档案中查找角色</p>
         </div>
       )}
     </div>

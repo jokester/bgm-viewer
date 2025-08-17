@@ -2,6 +2,90 @@
   "openapi": "3.1.0",
   "info": { "title": "FastAPI", "version": "0.1.0" },
   "paths": {
+    "/subjects/search": {
+      "post": {
+        "summary": "Search Subjects",
+        "description": "Search subjects using Elasticsearch.",
+        "operationId": "search_subjects_subjects_search_post",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubjectsIndexQuery" } } },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SubjectSearchResult" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/characters/search": {
+      "post": {
+        "summary": "Search Characters",
+        "description": "Search characters using Elasticsearch.",
+        "operationId": "search_characters_characters_search_post",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CharactersIndexQuery" } } },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CharacterSearchResult" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/people/search": {
+      "post": {
+        "summary": "Search People",
+        "description": "Search people using Elasticsearch.",
+        "operationId": "search_people_people_search_post",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PersonsIndexQuery" } } },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PersonSearchResult" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/episodes/search": {
+      "post": {
+        "summary": "Search Episodes",
+        "description": "Search episodes using Elasticsearch.",
+        "operationId": "search_episodes_episodes_search_post",
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EpisodesIndexQuery" } } },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EpisodeSearchResult" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
     "/subjects/{subject_id}": {
       "get": {
         "summary": "Get Subject",
@@ -222,6 +306,31 @@
         "title": "CharacterRole",
         "description": "Character role types in Bangumi."
       },
+      "CharacterSearchResult": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Character" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" },
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit" },
+          "offset": { "type": "integer", "title": "Offset" },
+          "has_more": { "type": "boolean", "title": "Has More" }
+        },
+        "type": "object",
+        "required": ["items", "total", "query", "limit", "offset", "has_more"],
+        "title": "CharacterSearchResult",
+        "description": "Result model for character search operations."
+      },
+      "CharactersIndexQuery": {
+        "properties": {
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit", "default": 20 },
+          "offset": { "type": "integer", "title": "Offset", "default": 0 },
+          "role": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Role" }
+        },
+        "type": "object",
+        "required": ["query"],
+        "title": "CharactersIndexQuery"
+      },
       "Episode": {
         "properties": {
           "id": { "type": "integer", "title": "Id" },
@@ -241,11 +350,37 @@
         "title": "Episode",
         "description": "Episode model."
       },
+      "EpisodeSearchResult": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Episode" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" },
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit" },
+          "offset": { "type": "integer", "title": "Offset" },
+          "has_more": { "type": "boolean", "title": "Has More" }
+        },
+        "type": "object",
+        "required": ["items", "total", "query", "limit", "offset", "has_more"],
+        "title": "EpisodeSearchResult",
+        "description": "Result model for episode search operations."
+      },
       "EpisodeType": {
         "type": "integer",
         "enum": [0, 1, 2, 3, 4, 5, 6],
         "title": "EpisodeType",
         "description": "Episode types in Bangumi."
+      },
+      "EpisodesIndexQuery": {
+        "properties": {
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit", "default": 20 },
+          "offset": { "type": "integer", "title": "Offset", "default": 0 },
+          "type": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Type" },
+          "subject_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Subject Id" }
+        },
+        "type": "object",
+        "required": ["query"],
+        "title": "EpisodesIndexQuery"
       },
       "Favorite": {
         "properties": {
@@ -284,11 +419,37 @@
         "title": "Person",
         "description": "Person model (individual, company, association)."
       },
+      "PersonSearchResult": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Person" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" },
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit" },
+          "offset": { "type": "integer", "title": "Offset" },
+          "has_more": { "type": "boolean", "title": "Has More" }
+        },
+        "type": "object",
+        "required": ["items", "total", "query", "limit", "offset", "has_more"],
+        "title": "PersonSearchResult",
+        "description": "Result model for person search operations."
+      },
       "PersonType": {
         "type": "integer",
         "enum": [0, 1, 2, 3],
         "title": "PersonType",
         "description": "Person types in Bangumi."
+      },
+      "PersonsIndexQuery": {
+        "properties": {
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit", "default": 20 },
+          "offset": { "type": "integer", "title": "Offset", "default": 0 },
+          "type": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Type" },
+          "career": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Career" }
+        },
+        "type": "object",
+        "required": ["query"],
+        "title": "PersonsIndexQuery"
       },
       "ScoreDetails": {
         "properties": {
@@ -350,11 +511,38 @@
         "title": "Subject",
         "description": "Subject model (anime, book, game, etc.)."
       },
+      "SubjectSearchResult": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Subject" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" },
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit" },
+          "offset": { "type": "integer", "title": "Offset" },
+          "has_more": { "type": "boolean", "title": "Has More" }
+        },
+        "type": "object",
+        "required": ["items", "total", "query", "limit", "offset", "has_more"],
+        "title": "SubjectSearchResult",
+        "description": "Result model for subject search operations."
+      },
       "SubjectType": {
         "type": "integer",
         "enum": [1, 2, 3, 4, 6],
         "title": "SubjectType",
         "description": "Subject types in Bangumi."
+      },
+      "SubjectsIndexQuery": {
+        "properties": {
+          "query": { "type": "string", "title": "Query" },
+          "limit": { "type": "integer", "title": "Limit", "default": 20 },
+          "offset": { "type": "integer", "title": "Offset", "default": 0 },
+          "type": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Type" },
+          "subject_type": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Subject Type" },
+          "nsfw": { "anyOf": [{ "type": "boolean" }, { "type": "null" }], "title": "Nsfw" }
+        },
+        "type": "object",
+        "required": ["query"],
+        "title": "SubjectsIndexQuery"
       },
       "Tag": {
         "properties": {

@@ -124,21 +124,14 @@ export interface HTTPValidationError {
   detail: ValidationError[];
 }
 
-// Search query interface
+// Search query interfaces - matching OpenAPI spec exactly
 export interface SubjectsIndexQuery {
   query: string;
   limit?: number;
   offset?: number;
+  type?: number;
   subject_type?: number;
   nsfw?: boolean;
-}
-
-export interface PeopleIndexQuery {
-  query: string;
-  limit?: number;
-  offset?: number;
-  type?: number;
-  career?: string;
 }
 
 export interface CharactersIndexQuery {
@@ -148,9 +141,25 @@ export interface CharactersIndexQuery {
   role?: number;
 }
 
-// API Response types
+export interface PersonsIndexQuery {
+  query: string;
+  limit?: number;
+  offset?: number;
+  type?: number;
+  career?: string;
+}
+
+export interface EpisodesIndexQuery {
+  query: string;
+  limit?: number;
+  offset?: number;
+  type?: number;
+  subject_id?: number;
+}
+
+// API Response types - matching OpenAPI spec exactly
 export interface SubjectSearchResult {
-  subjects: Subject[];
+  items: Subject[];
   total: number;
   query: string;
   limit: number;
@@ -159,7 +168,7 @@ export interface SubjectSearchResult {
 }
 
 export interface CharacterSearchResult {
-  characters: Character[];
+  items: Character[];
   total: number;
   query: string;
   limit: number;
@@ -168,7 +177,7 @@ export interface CharacterSearchResult {
 }
 
 export interface PersonSearchResult {
-  persons: Person[];
+  items: Person[];
   total: number;
   query: string;
   limit: number;
@@ -177,7 +186,7 @@ export interface PersonSearchResult {
 }
 
 export interface EpisodeSearchResult {
-  episodes: Episode[];
+  items: Episode[];
   total: number;
   query: string;
   limit: number;
@@ -185,6 +194,7 @@ export interface EpisodeSearchResult {
   has_more: boolean;
 }
 
+// Type aliases for backward compatibility
 export type SubjectsResponse = SubjectSearchResult;
 export type CharactersResponse = CharacterSearchResult;
 export type PeopleResponse = PersonSearchResult;
@@ -262,34 +272,20 @@ export class BGMArchiveAPI {
     return this.request<Subject>(`/subjects/${subjectId}`);
   }
 
-  async searchSubjects(searchQuery: SubjectsIndexQuery): Promise<SubjectsResponse> {
-    return this.request<SubjectsResponse>('/subjects/search', {
+  async searchSubjects(searchQuery: SubjectsIndexQuery): Promise<SubjectSearchResult> {
+    return this.request<SubjectSearchResult>('/subjects/search', {
       method: 'POST',
       body: JSON.stringify(searchQuery),
     });
   }
 
-  async searchPeople(searchQuery: PeopleIndexQuery): Promise<PeopleResponse> {
-    return this.request<PeopleResponse>('/people/search', {
-      method: 'POST',
-      body: JSON.stringify(searchQuery),
-    });
-  }
-
-  async searchCharacters(searchQuery: CharactersIndexQuery): Promise<CharactersResponse> {
-    return this.request<CharactersResponse>('/characters/search', {
-      method: 'POST',
-      body: JSON.stringify(searchQuery),
-    });
-  }
-
-  async getSubjectsMultiple(ids?: string): Promise<SubjectsResponse> {
+  async getSubjectsMultiple(ids?: string): Promise<Subject[]> {
     const params = ids ? `?ids=${encodeURIComponent(ids)}` : '';
-    return this.request<SubjectsResponse>(`/subjects/multiple${params}`);
+    return this.request<Subject[]>(`/subjects/multiple${params}`);
   }
 
-  async getSubjectEpisodes(subjectId: number): Promise<EpisodesResponse> {
-    return this.request<EpisodesResponse>(`/subjects/${subjectId}/episodes`);
+  async getSubjectEpisodes(subjectId: number): Promise<Episode[]> {
+    return this.request<Episode[]>(`/subjects/${subjectId}/episodes`);
   }
 
   // Character endpoints
@@ -297,9 +293,16 @@ export class BGMArchiveAPI {
     return this.request<Character>(`/characters/${characterId}`);
   }
 
-  async getCharactersMultiple(ids?: string): Promise<CharactersResponse> {
+  async searchCharacters(searchQuery: CharactersIndexQuery): Promise<CharacterSearchResult> {
+    return this.request<CharacterSearchResult>('/characters/search', {
+      method: 'POST',
+      body: JSON.stringify(searchQuery),
+    });
+  }
+
+  async getCharactersMultiple(ids?: string): Promise<Character[]> {
     const params = ids ? `?ids=${encodeURIComponent(ids)}` : '';
-    return this.request<CharactersResponse>(`/characters/multiple${params}`);
+    return this.request<Character[]>(`/characters/multiple${params}`);
   }
 
   // Person endpoints
@@ -307,9 +310,24 @@ export class BGMArchiveAPI {
     return this.request<Person>(`/people/${personId}`);
   }
 
-  async getPeopleMultiple(ids?: string): Promise<PeopleResponse> {
+  async searchPeople(searchQuery: PersonsIndexQuery): Promise<PersonSearchResult> {
+    return this.request<PersonSearchResult>('/people/search', {
+      method: 'POST',
+      body: JSON.stringify(searchQuery),
+    });
+  }
+
+  async getPeopleMultiple(ids?: string): Promise<Person[]> {
     const params = ids ? `?ids=${encodeURIComponent(ids)}` : '';
-    return this.request<PeopleResponse>(`/people/multiple${params}`);
+    return this.request<Person[]>(`/people/multiple${params}`);
+  }
+
+  // Episode endpoints
+  async searchEpisodes(searchQuery: EpisodesIndexQuery): Promise<EpisodeSearchResult> {
+    return this.request<EpisodeSearchResult>('/episodes/search', {
+      method: 'POST',
+      body: JSON.stringify(searchQuery),
+    });
   }
 
   // Utility methods
@@ -333,6 +351,7 @@ export const {
   searchSubjects,
   searchPeople,
   searchCharacters,
+  searchEpisodes,
   getSubjectsMultiple,
   getSubjectEpisodes,
   getCharacter,
