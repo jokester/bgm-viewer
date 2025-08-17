@@ -33,4 +33,29 @@ Random stuff build around [bangumi/Archive](https://github.com/bangumi/Archive)
 - `infobox` (weight: 1x) - Subject infobox
 - `tags.name` (weight: 2x) - Tag names
 
+### Search Characters
+- **POST** `/characters/search`
+- **Description**: Search characters using Elasticsearch full-text search
+- **Request Body**:
+  ```json
+  {
+    "query": "search term",
+    "limit": 20,
+    "offset": 0,
+    "role": 1
+  }
+  ```
+- **Response**: List of characters matching the search criteria
+
+**Parameters**:
+- `query` (required): Search term for full-text search across name, summary, and infobox
+- `limit` (optional): Maximum number of results to return (default: 20)
+- `offset` (optional): Number of results to skip for pagination (default: 0)
+- `role` (optional): Filter by character role (1=Main, 2=Supporting, 3=Minor, 4=Guest)
+
+**Search Fields**:
+- `name` (weight: 3x) - Character name
+- `summary` (weight: 2x) - Character summary
+- `infobox` (weight: 1x) - Character infobox
+
 ## ES (Elasticsearch)

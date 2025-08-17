@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@jokester/ts-commonutil": "catalog:deps",
+    "@react-sigma/core": "^5.0.4",
+    "@react-sigma/layout-forceatlas2": "^5.0.4",
     "clsx": "catalog:deps-react",
     "debug": "catalog:deps",
     "foxact": "catalog:deps-react",

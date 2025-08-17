@@ -14,10 +14,10 @@ interface NavItem {
 const navigationItems: NavItem[] = [
   { label: '主页', path: '/', icon: '🏠' },
   { label: '作品', path: '/subjects', icon: '📚' },
-  { label: '章节', path: '/episodes', icon: '📺' },
+  // { label: '章节', path: '/episodes', icon: '📺' },
   { label: '角色', path: '/characters', icon: '👤' },
   { label: '人物', path: '/people', icon: '👥' },
-  { label: '网络', path: '/graph', icon: '🕸️' },
+  { label: '网络', path: '/network', icon: '🕸️' },
 ];
 
 const shortcuts = [

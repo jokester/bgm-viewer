@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import logging
-from .base_index import BaseIndex
+from .base_index import BaseIndex, SearchResult
 from bgm_archive.loader import model
 
 logger = logging.getLogger(__name__)
@@ -15,11 +15,16 @@ class SubjectsIndexQuery(BaseModel):
     nsfw: Optional[bool] = None
 
 
+class SubjectSearchResult(SearchResult[model.Subject]):
+    """Result model for subject search operations."""
+    pass
+
+
 class SubjectsIndex(BaseIndex[model.Subject]):
     def __init__(self, es, index_name: str):
         super().__init__(es, index_name, model.Subject)
 
-    async def search(self, search_query: SubjectsIndexQuery) -> list[model.Subject]:
+    async def search(self, search_query: SubjectsIndexQuery) -> SubjectSearchResult:
         """Search subjects using Elasticsearch."""
         query_body = {
             "query": {
@@ -66,6 +71,8 @@ class SubjectsIndex(BaseIndex[model.Subject]):
         response = await self._es.search(index=self._index_name, body=query_body)
 
         hits = response.get("hits", {}).get("hits", [])
+        total = response.get("hits", {}).get("total", {}).get("value", 0)
+        
         subjects = []
         for hit in hits:
             try:
@@ -75,7 +82,16 @@ class SubjectsIndex(BaseIndex[model.Subject]):
                 logger.warning(f"Failed to parse subject from search result: {e}")
                 continue
 
-        return subjects
+        has_more = (search_query.offset + search_query.limit) < total
+        
+        return SubjectSearchResult(
+            items=subjects,
+            total=total,
+            query=search_query.query,
+            limit=search_query.limit,
+            offset=search_query.offset,
+            has_more=has_more
+        )
 
     @property
     def es_mappings(self) -> dict:

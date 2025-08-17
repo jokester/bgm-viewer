@@ -5,7 +5,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import dotenv
 
 from bgm_archive.duck import RdbRepository
-from bgm_archive.es import SubjectsIndex, SubjectsIndexQuery, get_async_client
+from bgm_archive.es import (
+    SubjectsIndex, SubjectsIndexQuery, SubjectSearchResult,
+    CharactersIndexQuery, CharacterSearchResult, PersonsIndexQuery, PersonSearchResult, 
+    EpisodesIndexQuery, EpisodeSearchResult,
+    get_async_client, CharacterIndex, PersonIndex, EpisodeIndex
+)
 import bgm_archive.loader.model as m
 
 dotenv.load_dotenv()
@@ -39,15 +44,49 @@ def build_app() -> FastAPI:
 
     es_client = get_async_client()
     subjects_index = SubjectsIndex(es_client, "bgm_subjects")
+    person_index = PersonIndex(es_client, "bgm_persons")
+    char_index = CharacterIndex(es_client, "bgm_characters")
+    episode_index = EpisodeIndex(es_client, "bgm_episodes")
 
-    @fastapi.post("/subjects/search", response_model=list[m.Subject])
+    @fastapi.post("/subjects/search", response_model=SubjectSearchResult)
     async def search_subjects(search_query: SubjectsIndexQuery):
         """Search subjects using Elasticsearch."""
         try:
             results = await subjects_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Search failed: {str(e)}")
+
+    @fastapi.post("/characters/search", response_model=CharacterSearchResult)
+    async def search_characters(search_query: CharactersIndexQuery):
+        """Search characters using Elasticsearch."""
+        try:
+            results = await char_index.search(search_query)
+            return results
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Search failed: {str(e)}")
+
+    @fastapi.post("/people/search", response_model=PersonSearchResult)
+    async def search_people(search_query: PersonsIndexQuery):
+        """Search people using Elasticsearch."""
+        try:
+            results = await person_index.search(search_query)
+            return results
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Search failed: {str(e)}")
+
+    @fastapi.post("/episodes/search", response_model=EpisodeSearchResult)
+    async def search_episodes(search_query: EpisodesIndexQuery):
+        """Search episodes using Elasticsearch."""
+        try:
+            results = await episode_index.search(search_query)
+            return results
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.get("/subjects/{subject_id}", response_model=m.Subject)
     def get_subject(subject_id: int):

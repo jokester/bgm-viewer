@@ -133,11 +133,62 @@ export interface SubjectsIndexQuery {
   nsfw?: boolean;
 }
 
+export interface PeopleIndexQuery {
+  query: string;
+  limit?: number;
+  offset?: number;
+  type?: number;
+  career?: string;
+}
+
+export interface CharactersIndexQuery {
+  query: string;
+  limit?: number;
+  offset?: number;
+  role?: number;
+}
+
 // API Response types
-export type SubjectsResponse = Subject[];
-export type CharactersResponse = Character[];
-export type PeopleResponse = Person[];
-export type EpisodesResponse = Episode[];
+export interface SubjectSearchResult {
+  subjects: Subject[];
+  total: number;
+  query: string;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+export interface CharacterSearchResult {
+  characters: Character[];
+  total: number;
+  query: string;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+export interface PersonSearchResult {
+  persons: Person[];
+  total: number;
+  query: string;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+export interface EpisodeSearchResult {
+  episodes: Episode[];
+  total: number;
+  query: string;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+export type SubjectsResponse = SubjectSearchResult;
+export type CharactersResponse = CharacterSearchResult;
+export type PeopleResponse = PersonSearchResult;
+export type EpisodesResponse = EpisodeSearchResult;
 
 // API Client Configuration
 export interface APIClientConfig {
@@ -218,6 +269,20 @@ export class BGMArchiveAPI {
     });
   }
 
+  async searchPeople(searchQuery: PeopleIndexQuery): Promise<PeopleResponse> {
+    return this.request<PeopleResponse>('/people/search', {
+      method: 'POST',
+      body: JSON.stringify(searchQuery),
+    });
+  }
+
+  async searchCharacters(searchQuery: CharactersIndexQuery): Promise<CharactersResponse> {
+    return this.request<CharactersResponse>('/characters/search', {
+      method: 'POST',
+      body: JSON.stringify(searchQuery),
+    });
+  }
+
   async getSubjectsMultiple(ids?: string): Promise<SubjectsResponse> {
     const params = ids ? `?ids=${encodeURIComponent(ids)}` : '';
     return this.request<SubjectsResponse>(`/subjects/multiple${params}`);
@@ -266,6 +331,8 @@ export const defaultAPI = new BGMArchiveAPI({
 export const {
   getSubject,
   searchSubjects,
+  searchPeople,
+  searchCharacters,
   getSubjectsMultiple,
   getSubjectEpisodes,
   getCharacter,

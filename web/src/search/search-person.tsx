@@ -1,20 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Subject, SubjectType, SubjectsIndexQuery } from '../data/api';
+import { Person, PersonType, PeopleIndexQuery, PersonSearchResult } from '../data/api';
 import { useBgmApi } from '../data';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
-import { Checkbox } from 'primereact/checkbox';
 import { Card } from 'primereact/card';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Paginator } from 'primereact/paginator';
 
-export const SearchSubject = () => {
+export const SearchPerson = () => {
   const api = useBgmApi();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedType, setSelectedType] = useState<number | null>(null);
-  const [nsfwFilter, setNsfwFilter] = useState<boolean | null>(null);
-  const [results, setResults] = useState<Subject[]>([]);
+  const [selectedCareer, setSelectedCareer] = useState<string | null>(null);
+  const [results, setResults] = useState<Person[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
@@ -24,19 +23,25 @@ export const SearchSubject = () => {
 
   const pageSize = 20;
 
-  const subjectTypeOptions = [
-    { label: 'All Types', value: null },
-    { label: 'Anime', value: SubjectType.ANIME },
-    { label: 'Comic', value: SubjectType.COMIC },
-    { label: 'Game', value: SubjectType.GAME },
-    { label: 'Music', value: SubjectType.MUSIC },
-    { label: 'Real', value: SubjectType.REAL },
+  const personTypeOptions = [
+    { label: '所有类型', value: null },
+    { label: '个人', value: PersonType.INDIVIDUAL },
+    { label: '公司', value: PersonType.COMPANY },
+    { label: '组合', value: PersonType.ASSOCIATION },
+    { label: '单位', value: PersonType.UNIT },
   ];
 
-  const nsfwOptions = [
-    { label: 'All Content', value: null },
-    { label: 'Safe Only', value: false },
-    { label: 'NSFW Only', value: true },
+  const careerOptions = [
+    { label: '所有职业', value: null },
+    { label: '导演', value: 'Director' },
+    { label: '制作人', value: 'Producer' },
+    { label: '编剧', value: 'Writer' },
+    { label: '艺术家', value: 'Artist' },
+    { label: '声优', value: 'seiyu' },
+    { label: '作曲', value: 'Composer' },
+    { label: '人物设定', value: 'Character Designer' },
+    { label: '作画监督', value: 'Animation Director' },
+    { label: '音响监督', value: 'Sound Director' },
   ];
 
   // Debounced search function
@@ -73,24 +78,17 @@ export const SearchSubject = () => {
     setCurrentPage(page);
 
     try {
-      const searchParams: SubjectsIndexQuery = {
+      const searchParams: PeopleIndexQuery = {
         query: searchQuery.trim(),
         limit: pageSize,
         offset: page * pageSize,
-        subject_type: selectedType || undefined,
-        nsfw: nsfwFilter !== null ? nsfwFilter : undefined,
+        type: selectedType || undefined,
+        career: selectedCareer || undefined,
       };
 
-      const searchResults = await api.searchSubjects(searchParams);
-      setResults(searchResults);
-      
-      // Estimate total results based on current page and results
-      // If we got a full page, there might be more results
-      if (searchResults.length === pageSize) {
-        setTotalResults((page + 1) * pageSize + 1); // +1 to indicate there might be more
-      } else {
-        setTotalResults(page * pageSize + searchResults.length);
-      }
+      const searchResults = await api.searchPeople(searchParams);
+      setResults(searchResults.persons);
+      setTotalResults(searchResults.total);
       
       setHasSearched(true);
     } catch (err) {
@@ -136,14 +134,13 @@ export const SearchSubject = () => {
     performSearch(0);
   };
 
-  const formatSubjectType = (type: number): string => {
+  const formatPersonType = (type: number): string => {
     switch (type) {
-      case SubjectType.ANIME: return 'Anime';
-      case SubjectType.COMIC: return 'Comic';
-      case SubjectType.GAME: return 'Game';
-      case SubjectType.MUSIC: return 'Music';
-      case SubjectType.REAL: return 'Real';
-      default: return 'Unknown';
+      case PersonType.INDIVIDUAL: return '个人';
+      case PersonType.COMPANY: return '公司';
+      case PersonType.ASSOCIATION: return '组合';
+      case PersonType.UNIT: return '单位';
+      default: return '未知';
     }
   };
 
@@ -154,85 +151,85 @@ export const SearchSubject = () => {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Search Subjects</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">搜索人物</h1>
       
       {/* Search Form */}
       <Card className="mb-6">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">Search Criteria</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">搜索条件</h2>
           <p className="text-sm text-gray-600 mb-3">
-            Search across subject names, summaries, and tags. Type at least 2 characters to start searching.
+            搜索人物姓名、简介、信息框和职业。输入至少2个字符开始搜索。
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-2">
-            <label htmlFor="searchQuery" className="block text-sm font-medium text-gray-700 mb-2">
-              Search Query
-            </label>
-            <div className="relative">
-              <InputText
-                id="searchQuery"
-                value={searchQuery}
-                onChange={(e) => handleQueryChange(e.target.value)}
-                onKeyUp={handleKeyPress}
-                placeholder="Search by name, summary, tags..."
+            <div className="lg:col-span-2">
+              <label htmlFor="searchQuery" className="block text-sm font-medium text-gray-700 mb-2">
+                搜索查询
+              </label>
+              <div className="relative">
+                <InputText
+                  id="searchQuery"
+                  value={searchQuery}
+                  onChange={(e) => handleQueryChange(e.target.value)}
+                  onKeyUp={handleKeyPress}
+                  placeholder="按姓名、简介、职业搜索..."
+                  className="w-full"
+                />
+                {loading && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <ProgressSpinner style={{ width: '16px', height: '16px' }} />
+                  </div>
+                )}
+                {searchQuery.trim().length >= 2 && !loading && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <i className="pi pi-clock text-gray-400 text-sm"></i>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <label htmlFor="personType" className="block text-sm font-medium text-gray-700 mb-2">
+                人物类型
+              </label>
+              <Dropdown
+                id="personType"
+                value={selectedType}
+                onChange={(e) => {
+                  setSelectedType(e.value);
+                  handleFilterChange();
+                }}
+                options={personTypeOptions}
+                optionLabel="label"
+                optionValue="value"
+                placeholder="选择类型"
                 className="w-full"
               />
-              {loading && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <ProgressSpinner style={{ width: '16px', height: '16px' }} />
-                </div>
-              )}
-              {searchQuery.trim().length >= 2 && !loading && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <i className="pi pi-clock text-gray-400 text-sm"></i>
-                </div>
-              )}
+            </div>
+            
+            <div>
+              <label htmlFor="careerFilter" className="block text-sm font-medium text-gray-700 mb-2">
+                职业
+              </label>
+              <Dropdown
+                id="careerFilter"
+                value={selectedCareer}
+                onChange={(e) => {
+                  setSelectedCareer(e.value);
+                  handleFilterChange();
+                }}
+                options={careerOptions}
+                optionLabel="label"
+                optionValue="value"
+                placeholder="选择职业"
+                className="w-full"
+              />
             </div>
           </div>
-          
-          <div>
-            <label htmlFor="subjectType" className="block text-sm font-medium text-gray-700 mb-2">
-              Subject Type
-            </label>
-            <Dropdown
-              id="subjectType"
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.value);
-                handleFilterChange();
-              }}
-              options={subjectTypeOptions}
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select type"
-              className="w-full"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="nsfwFilter" className="block text-sm font-medium text-gray-700 mb-2">
-              Content Filter
-            </label>
-            <Dropdown
-              id="nsfwFilter"
-              value={nsfwFilter}
-              onChange={(e) => {
-                setNsfwFilter(e.value);
-                handleFilterChange();
-              }}
-              options={nsfwOptions}
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select filter"
-              className="w-full"
-            />
-          </div>
-        </div>
         </div>
         
         <div className="flex justify-center gap-3">
           <Button
-            label={loading ? "Searching..." : "Search"}
+            label={loading ? "搜索中..." : "搜索"}
             icon={loading ? "pi pi-spinner" : "pi pi-search"}
             onClick={handleSearch}
             disabled={loading || !searchQuery.trim()}
@@ -241,7 +238,7 @@ export const SearchSubject = () => {
           />
           {hasSearched && (
             <Button
-              label="Clear"
+              label="清除"
               icon="pi pi-times"
               onClick={() => {
                 setSearchQuery('');
@@ -269,7 +266,7 @@ export const SearchSubject = () => {
       {loading && (
         <div className="flex justify-center items-center py-8">
           <ProgressSpinner />
-          <span className="ml-3 text-gray-600">Searching...</span>
+          <span className="ml-3 text-gray-600">搜索中...</span>
         </div>
       )}
 
@@ -280,18 +277,18 @@ export const SearchSubject = () => {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-blue-800">Search Query: "{searchQuery}"</h3>
+                <h3 className="text-sm font-medium text-blue-800">搜索查询: "{searchQuery}"</h3>
                 <div className="flex items-center gap-4 mt-1 text-xs text-blue-600">
                   {selectedType !== null && (
-                    <span>Type: {subjectTypeOptions.find(opt => opt.value === selectedType)?.label}</span>
+                    <span>类型: {personTypeOptions.find(opt => opt.value === selectedType)?.label}</span>
                   )}
-                  {nsfwFilter !== null && (
-                    <span>Content: {nsfwFilter ? 'NSFW Only' : 'Safe Only'}</span>
+                  {selectedCareer !== null && (
+                    <span>职业: {selectedCareer}</span>
                   )}
                 </div>
               </div>
               <Button
-                label="Modify Search"
+                label="修改搜索"
                 icon="pi pi-pencil"
                 size="small"
                 severity="secondary"
@@ -308,10 +305,10 @@ export const SearchSubject = () => {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-xl font-semibold text-gray-800">
-                Search Results
+                搜索结果
               </h2>
               <p className="text-sm text-gray-600">
-                Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalResults)} of approximately {totalResults} results
+                显示第 {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalResults)} 条，共约 {totalResults} 条结果
               </p>
             </div>
             {totalResults > pageSize && (
@@ -329,11 +326,11 @@ export const SearchSubject = () => {
           {results.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <i className="pi pi-search text-4xl mb-4 block"></i>
-              <p>No results found for "{searchQuery}"</p>
-              <p className="text-sm">Try adjusting your search terms or filters</p>
+              <p>未找到 "{searchQuery}" 的结果</p>
+              <p className="text-sm">请尝试调整搜索词或筛选条件</p>
               <div className="mt-4">
                 <Button
-                  label="Try Different Search"
+                  label="尝试其他搜索"
                   icon="pi pi-refresh"
                   onClick={() => {
                     setSearchQuery('');
@@ -350,61 +347,54 @@ export const SearchSubject = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {results.map((subject) => (
-                <Card key={subject.id} className="hover:shadow-lg transition-shadow">
+              {results.map((person) => (
+                <Card key={person.id} className="hover:shadow-lg transition-shadow">
                   <div className="flex items-start justify-between mb-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {formatSubjectType(subject.type)}
+                      {formatPersonType(person.type)}
                     </span>
-                    {subject.nsfw && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        NSFW
-                      </span>
-                    )}
                   </div>
                   
                   <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
-                    {subject.name}
+                    {person.name}
                   </h3>
                   
-                  {subject.name_cn && subject.name_cn !== subject.name && (
-                    <p className="text-sm text-gray-600 mb-2">{subject.name_cn}</p>
+                  {person.career && person.career.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex flex-wrap gap-1">
+                        {person.career.slice(0, 3).map((career, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800"
+                          >
+                            {career}
+                          </span>
+                        ))}
+                        {person.career.length > 3 && (
+                          <span className="text-xs text-gray-500">
+                            +{person.career.length - 3} 更多
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   )}
                   
-                  {subject.summary && (
+                  {person.summary && (
                     <p className="text-sm text-gray-700 mb-3 line-clamp-3">
-                      {truncateText(subject.summary)}
+                      {truncateText(person.summary)}
                     </p>
                   )}
                   
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center">
-                      <i className="pi pi-star text-yellow-500 mr-1"></i>
-                      <span>{subject.score.toFixed(1)}</span>
+                      <i className="pi pi-comment text-blue-500 mr-1"></i>
+                      <span>{person.comments}</span>
                     </div>
                     <div className="flex items-center">
                       <i className="pi pi-heart text-red-500 mr-1"></i>
-                      <span>{subject.favorite.done + subject.favorite.doing}</span>
+                      <span>{person.collects}</span>
                     </div>
                   </div>
-                  
-                  {subject.tags.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {subject.tags.slice(0, 3).map((tag, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800"
-                        >
-                          {tag.name}
-                        </span>
-                      ))}
-                      {subject.tags.length > 3 && (
-                        <span className="text-xs text-gray-500">
-                          +{subject.tags.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  )}
                 </Card>
               ))}
             </div>
@@ -415,9 +405,9 @@ export const SearchSubject = () => {
       {/* Initial State */}
       {!loading && !hasSearched && (
         <div className="text-center py-12 text-gray-500">
-          <i className="pi pi-search text-6xl mb-4 block"></i>
-          <h2 className="text-xl font-semibold mb-2">Start Your Search</h2>
-          <p>Enter a search query above to find subjects in the Bangumi archive</p>
+          <i className="pi pi-users text-6xl mb-4 block"></i>
+          <h2 className="text-xl font-semibold mb-2">开始搜索</h2>
+          <p>在上方输入搜索查询以在Bangumi档案中查找人物</p>
         </div>
       )}
     </div>

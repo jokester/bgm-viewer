@@ -12,7 +12,7 @@ The important files you will work on are:
 
 ```
 web/main.tsx : the bundle entrypoint, importing page components and mount at router.
-web/pages : the page components
+web/pages : the page components and page-shared code like headers.
 web/src : everything else
 web/src/api/index.ts : API client (components should summon API with `useBgmApi()` hook)
 ```

@@ -1,11 +1,21 @@
+from abc import ABC, abstractmethod
+from typing import Generic, TypeVar, List
 from pydantic import BaseModel
 from elasticsearch import AsyncElasticsearch
 from typing import Iterable, AsyncIterable
 from elasticsearch.helpers import async_streaming_bulk
-from typing import TypeVar, Generic
 import logging
 
-ModelType = TypeVar("ModelType", bound=BaseModel)
+T = TypeVar('T')
+
+class SearchResult(BaseModel, Generic[T]):
+    """Base result model for search operations."""
+    items: List[T]
+    total: int
+    query: str
+    limit: int
+    offset: int
+    has_more: bool
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +33,15 @@ _analysis = {
 }
 
 
-class BaseIndex(Generic[ModelType]):
-    def __init__(self, es: AsyncElasticsearch, index_name: str, model_type: ModelType):
+class BaseIndex(ABC, Generic[T]):
+    """Base class for Elasticsearch indexes."""
+    
+    def __init__(self, es: AsyncElasticsearch, index_name: str, model_type: type[T]):
         self._es = es
         self._index_name = index_name
         self._model_type = model_type
 
-    async def get_by_id(self, id: int) -> ModelType | None:
+    async def get_by_id(self, id: int) -> T | None:
         response = await self._es.search(
             index=self._index_name, query={"term": {"id": id}}
         )
@@ -83,6 +95,13 @@ class BaseIndex(Generic[ModelType]):
             if not succeed:
                 print(f"Failed to index document: {details}")
 
+    @abstractmethod
+    async def search(self, search_query) -> SearchResult[T]:
+        """Search using Elasticsearch."""
+        pass
+
     @property
+    @abstractmethod
     def es_mappings(self) -> dict:
-        raise NotImplementedError("Subclasses must implement the mappings property")
+        """Return Elasticsearch mappings for this index."""
+        pass

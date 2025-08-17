@@ -16,7 +16,7 @@ export function NotFoundPage(props: PageProps) {
   return (
     <Layout path={props.path ?? '/not_found'}>
       <div className='container py-8 text-center'>
-        Page not found... You will be redirected in 5s.
+        {props.url} Page not found... You will be redirected in 5s.
       </div>
     </Layout>
   );
