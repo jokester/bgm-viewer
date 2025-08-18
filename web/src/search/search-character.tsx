@@ -7,7 +7,7 @@ import { Card } from 'primereact/card';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Paginator } from 'primereact/paginator';
 
-export const SearchCharacter = () => {
+export const SearchCharacter = (props: {onResultClick?: (character: Character) => void}) => {
   const api = useBgmApi();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [results, setResults] = useState<Character[]>([]);
@@ -267,7 +267,11 @@ export const SearchCharacter = () => {
             : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {results.map((character) => (
-                  <Card key={character.id} className='character-card'>
+                  <Card 
+                    key={character.id} 
+                    className='character-card hover:shadow-lg transition-shadow cursor-pointer'
+                    onClick={() => props.onResultClick?.(character)}
+                  >
                     <div className='flex items-center mb-3'>
                       <div className='w-16 h-16 rounded-full mr-3 bg-gray-200 flex items-center justify-center'>
                         <i className='pi pi-user text-2xl text-gray-400'></i>

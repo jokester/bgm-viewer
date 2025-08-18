@@ -9,7 +9,7 @@ import { Card } from 'primereact/card';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Paginator } from 'primereact/paginator';
 
-export const SearchSubject = () => {
+export const SearchSubject = (props: {onResultClick?: (subject: Subject) => void}) => {
   const api = useBgmApi();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedType, setSelectedType] = useState<number | null>(null);
@@ -351,7 +351,11 @@ export const SearchSubject = () => {
             : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {results.map((subject) => (
-                  <Card key={subject.id} className='hover:shadow-lg transition-shadow'>
+                  <Card 
+                    key={subject.id} 
+                    className='hover:shadow-lg transition-shadow cursor-pointer'
+                    onClick={() => props.onResultClick?.(subject)}
+                  >
                     <div className='flex items-start justify-between mb-2'>
                       <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
                         {formatSubjectType(subject.type)}
