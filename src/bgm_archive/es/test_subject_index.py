@@ -37,7 +37,7 @@ async def test_search_subjects_basic(subjects_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -143,7 +143,7 @@ async def test_search_subjects_pagination(subjects_index, mock_es_client):
                 }
                 for i in range(1, 6)  # 5 results
             ],
-            "total": {"value": 25}  # Total of 25 results
+            "total": {"value": 25},  # Total of 25 results
         }
     }
 
@@ -212,7 +212,7 @@ async def test_search_subjects_sorting(subjects_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -317,7 +317,7 @@ async def test_search_subjects_invalid_data_handling(subjects_index, mock_es_cli
                     }
                 },
             ],
-            "total": {"value": 2}
+            "total": {"value": 2},
         }
     }
 

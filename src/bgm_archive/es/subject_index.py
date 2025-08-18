@@ -18,6 +18,7 @@ class SubjectsIndexQuery(BaseModel):
 
 class SubjectSearchResult(SearchResult[model.Subject]):
     """Result model for subject search operations."""
+
     pass
 
 
@@ -63,13 +64,13 @@ class SubjectsIndex(BaseIndex[model.Subject]):
             query_body["query"]["bool"]["filter"].append(
                 {"term": {"type": search_query.type}}
             )
-        
+
         # Handle subject_type alias for type field
         if search_query.subject_type is not None:
             query_body["query"]["bool"]["filter"].append(
                 {"term": {"type": search_query.subject_type}}
             )
-            
+
         # Add NSFW filter if specified
         if search_query.nsfw is not None:
             query_body["query"]["bool"]["filter"].append(
@@ -80,7 +81,7 @@ class SubjectsIndex(BaseIndex[model.Subject]):
 
         hits = response.get("hits", {}).get("hits", [])
         total = response.get("hits", {}).get("total", {}).get("value", 0)
-        
+
         subjects = []
         for hit in hits:
             try:
@@ -91,14 +92,14 @@ class SubjectsIndex(BaseIndex[model.Subject]):
                 continue
 
         has_more = (search_query.offset + search_query.limit) < total
-        
+
         return SubjectSearchResult(
             items=subjects,
             total=total,
             query=search_query.query,
             limit=search_query.limit,
             offset=search_query.offset,
-            has_more=has_more
+            has_more=has_more,
         )
 
     @property

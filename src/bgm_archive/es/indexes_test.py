@@ -13,7 +13,7 @@ from .test_common import (
 # This file now contains only the common tests that span multiple indexes.
 # Individual index tests have been moved to separate files:
 # - test_subject_index.py
-# - test_character_index.py  
+# - test_character_index.py
 # - test_person_index.py
 # - test_episode_index.py
 # - test_common.py (contains shared fixtures and common tests)

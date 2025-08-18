@@ -17,6 +17,7 @@ class EpisodesIndexQuery(BaseModel):
 
 class EpisodeSearchResult(SearchResult[model.Episode]):
     """Result model for episode search operations."""
+
     pass
 
 
@@ -69,7 +70,7 @@ class EpisodeIndex(BaseIndex[model.Episode]):
 
         hits = response.get("hits", {}).get("hits", [])
         total = response.get("hits", {}).get("total", {}).get("value", 0)
-        
+
         episodes = []
         for hit in hits:
             try:
@@ -80,14 +81,14 @@ class EpisodeIndex(BaseIndex[model.Episode]):
                 continue
 
         has_more = (search_query.offset + search_query.limit) < total
-        
+
         return EpisodeSearchResult(
             items=episodes,
             total=total,
             query=search_query.query,
             limit=search_query.limit,
             offset=search_query.offset,
-            has_more=has_more
+            has_more=has_more,
         )
 
     @property

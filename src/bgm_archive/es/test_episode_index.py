@@ -26,7 +26,7 @@ async def test_search_episodes_basic(episodes_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -90,7 +90,9 @@ async def test_search_episodes_with_filters(episodes_index, mock_es_client):
     assert type_filter["term"]["type"] == 0
 
     # Subject ID filter
-    subject_filter = next(f for f in filters if "term" in f and "subject_id" in f["term"])
+    subject_filter = next(
+        f for f in filters if "term" in f and "subject_id" in f["term"]
+    )
     assert subject_filter["term"]["subject_id"] == 100
 
     # Verify pagination
@@ -121,7 +123,7 @@ async def test_search_episodes_pagination(episodes_index, mock_es_client):
                 }
                 for i in range(1, 6)  # 5 results
             ],
-            "total": {"value": 25}  # Total of 25 results
+            "total": {"value": 25},  # Total of 25 results
         }
     }
 
@@ -179,7 +181,7 @@ async def test_search_episodes_sorting(episodes_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -270,7 +272,7 @@ async def test_search_episodes_invalid_data_handling(episodes_index, mock_es_cli
                     }
                 },
             ],
-            "total": {"value": 2}
+            "total": {"value": 2},
         }
     }
 

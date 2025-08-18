@@ -16,6 +16,7 @@ class CharactersIndexQuery(BaseModel):
 
 class CharacterSearchResult(SearchResult[model.Character]):
     """Result model for character search operations."""
+
     pass
 
 
@@ -64,7 +65,7 @@ class CharacterIndex(BaseIndex[model.Character]):
 
         hits = response.get("hits", {}).get("hits", [])
         total = response.get("hits", {}).get("total", {}).get("value", 0)
-        
+
         characters = []
         for hit in hits:
             try:
@@ -75,14 +76,14 @@ class CharacterIndex(BaseIndex[model.Character]):
                 continue
 
         has_more = (search_query.offset + search_query.limit) < total
-        
+
         return CharacterSearchResult(
             items=characters,
             total=total,
             query=search_query.query,
             limit=search_query.limit,
             offset=search_query.offset,
-            has_more=has_more
+            has_more=has_more,
         )
 
     @property

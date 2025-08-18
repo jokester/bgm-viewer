@@ -6,11 +6,12 @@ from typing import Iterable, AsyncIterable
 from elasticsearch.helpers import async_streaming_bulk
 import logging
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 class SearchResult(BaseModel, Generic[T]):
     """Base result model for search operations."""
+
     items: List[T]
     total: int
     query: str

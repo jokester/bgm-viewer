@@ -8,10 +8,19 @@ import concurrent.futures as cf
 
 from bgm_archive.duck import RdbRepository, GraphEdge, Subgraph, GraphRepository
 from bgm_archive.es import (
-    SubjectsIndex, SubjectsIndexQuery, SubjectSearchResult,
-    CharactersIndexQuery, CharacterSearchResult, PersonsIndexQuery, PersonSearchResult,
-    EpisodesIndexQuery, EpisodeSearchResult,
-    get_async_client, CharacterIndex, PersonIndex, EpisodeIndex
+    SubjectsIndex,
+    SubjectsIndexQuery,
+    SubjectSearchResult,
+    CharactersIndexQuery,
+    CharacterSearchResult,
+    PersonsIndexQuery,
+    PersonSearchResult,
+    EpisodesIndexQuery,
+    EpisodeSearchResult,
+    get_async_client,
+    CharacterIndex,
+    PersonIndex,
+    EpisodeIndex,
 )
 import bgm_archive.loader.model as m
 import asyncio
@@ -67,8 +76,7 @@ def build_app() -> FastAPI:
             results = await subjects_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.post("/characters/search", response_model=CharacterSearchResult)
     async def search_characters(search_query: CharactersIndexQuery):
@@ -77,8 +85,7 @@ def build_app() -> FastAPI:
             results = await char_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.post("/people/search", response_model=PersonSearchResult)
     async def search_people(search_query: PersonsIndexQuery):
@@ -87,8 +94,7 @@ def build_app() -> FastAPI:
             results = await person_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.post("/episodes/search", response_model=EpisodeSearchResult)
     async def search_episodes(search_query: EpisodesIndexQuery):
@@ -97,8 +103,7 @@ def build_app() -> FastAPI:
             results = await episode_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.get("/subjects/{subject_id}", response_model=m.Subject)
     def get_subject(subject_id: int):
@@ -124,7 +129,7 @@ def build_app() -> FastAPI:
         s2s_edges, s2c_edges, s2p_edges = await asyncio.gather(
             in_thread(lambda: gdb.expand_s2s(subject)),
             in_thread(lambda: gdb.expand_s2c(subject)),
-            in_thread(lambda: gdb.expand_s2p(subject))
+            in_thread(lambda: gdb.expand_s2p(subject)),
         )
         return Subgraph(from_subject=subject, edges=s2s_edges + s2c_edges + s2p_edges)
 
@@ -146,8 +151,8 @@ def build_app() -> FastAPI:
         if character is None:
             raise HTTPException(status_code=404, detail="Character not found")
         c2s_edges, c2p_edges = await asyncio.gather(
-            in_thread(lambda: gdb.expand_c2s(character)),
-            in_thread(lambda: gdb.expand_c2p(character))
+            in_thread(lambda: gdb.expand_cs(character)),
+            in_thread(lambda: gdb.expand_c2p(character)),
         )
         return Subgraph(from_character=character, edges=c2p_edges)
 
@@ -168,8 +173,10 @@ def build_app() -> FastAPI:
         person = rdb.find_person_by_id(person_id)
         if person is None:
             raise HTTPException(status_code=404, detail="Person not found")
-        p2s_edges, p2c_edges = await asyncio.gather(in_thread(lambda: gdb.expand_p2s(person)),
-                                                    in_thread(lambda: gdb.expand_p2c(person)))
+        p2s_edges, p2c_edges = await asyncio.gather(
+            in_thread(lambda: gdb.expand_p2s(person)),
+            in_thread(lambda: gdb.expand_p2c(person)),
+        )
         return Subgraph(from_person=person, edges=p2s_edges + p2c_edges)
 
     return fastapi

@@ -3,8 +3,7 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .normalizer import launder_date
 
-_config = ConfigDict(use_enum_values=False,
-                     str_strip_whitespace=True, extra="forbid")
+_config = ConfigDict(use_enum_values=False, str_strip_whitespace=True, extra="forbid")
 
 
 class SubjectType(IntEnum):
@@ -210,8 +209,16 @@ class GamePlatform(IntEnum):
 
 class SubjectPersonType:
     @classmethod
-    def from_value(cls, value: int) -> 'AnimeStuff | BookStaff | GameStaff | MusicStaff | RealStaff | None':
-        for con in (SubjectPersonType.AnimeStuff, SubjectPersonType.BookStaff, SubjectPersonType.GameStaff, SubjectPersonType.MusicStaff, SubjectPersonType.RealStaff):
+    def from_value(
+        cls, value: int
+    ) -> "AnimeStuff | BookStaff | GameStaff | MusicStaff | RealStaff | None":
+        for con in (
+            SubjectPersonType.AnimeStuff,
+            SubjectPersonType.BookStaff,
+            SubjectPersonType.GameStaff,
+            SubjectPersonType.MusicStaff,
+            SubjectPersonType.RealStaff,
+        ):
             try:
                 return con(value)
             except ValueError:
@@ -524,6 +531,7 @@ class Character(BaseModel):
     model_config = _config
 
     id: int
+    # TODO: should we ignore this? SubjectCharacterType seems to provide more adequate information
     role: CharacterRole
     name: str
     infobox: str
@@ -576,7 +584,7 @@ class SubjectCharacter(BaseModel):
 
 
 class SubjectPerson(BaseModel):
-    """Relation between subject and person."""
+    """Staff Role relation per (subject, person)."""
 
     model_config = _config
 
@@ -592,7 +600,7 @@ class SubjectPerson(BaseModel):
 
 
 class PersonCharacter(BaseModel):
-    """Relation per (person_id, character_id, subject_id)."""
+    """Engagement or Performance per (person_id, character_id, subject_id)."""
 
     model_config = _config
 
@@ -603,8 +611,9 @@ class PersonCharacter(BaseModel):
 
 
 class Entity(BaseModel):
-    type_: Literal["subject", "character", "person"] = Field()
-    """A union"""
+    # Entity is a model to contain 1 (simple entity) or 2 (only in "engagement" type) model values
+    # "engagement" is a special virtual entity to model a (subject, person, character) joint
+    type_: Literal["subject", "character", "person", "engagement"] = Field()
     subject: Subject | None = None
     character: Character | None = None
     person: Person | None = None

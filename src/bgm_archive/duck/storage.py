@@ -59,19 +59,16 @@ class DuckdbStorage:
         self.import_episodes(wrap_iterator(loader.episodes()))
         logger.info("Imported episodes")
 
-        self.import_subject_relations(
-            wrap_iterator(loader.subject_relations()))
+        self.import_subject_relations(wrap_iterator(loader.subject_relations()))
         logger.info("Imported subject relations")
 
         self.import_subject_persons(wrap_iterator(loader.subject_persons()))
         logger.info("Imported subject persons")
 
-        self.import_subject_characters(
-            wrap_iterator(loader.subject_characters()))
+        self.import_subject_characters(wrap_iterator(loader.subject_characters()))
         logger.info("Imported subject characters")
 
-        self.import_person_characters(
-            wrap_iterator(loader.person_characters()))
+        self.import_person_characters(wrap_iterator(loader.person_characters()))
         logger.info("Imported person characters")
 
     def import_subjects(self, subjects: Iterator[model.Subject]) -> int:
@@ -105,8 +102,7 @@ class DuckdbStorage:
             conn.execute(f"""
             COPY Subjects FROM '{tmp_json}'
                          """)
-            row = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM Subjects").fetchone()
+            row = conn.execute("SELECT COUNT(*) AS cnt FROM Subjects").fetchone()
             cnt = cast(int, row[0])  # type: ignore
             logging.info("Imported %d subjects from %s", cnt, tmp_json)
             return cnt
@@ -159,8 +155,7 @@ class DuckdbStorage:
             COPY Characters FROM '{tmp_json}'
                          """)
             logging.info("Imported characters from %s", tmp_json)
-            (count) = conn.execute(
-                "SELECT COUNT(*) AS cnt FROM Characters").fetchone()
+            (count) = conn.execute("SELECT COUNT(*) AS cnt FROM Characters").fetchone()
             return cast(int, count)
 
     def import_episodes(self, episodes: Iterator[model.Episode]) -> int:
@@ -353,6 +348,8 @@ CREATE TABLE IF NOT EXISTS Episodes(
     -- FOREIGN KEY(subject_id) REFERENCES Subjects(id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_episodes_subject_id ON Episodes(subject_id);
+
 -- edge tables
 
 CREATE TABLE IF NOT EXISTS SubjectRelation(
@@ -365,6 +362,8 @@ CREATE TABLE IF NOT EXISTS SubjectRelation(
     -- FOREIGN KEY(related_subject_id) REFERENCES Subjects(id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_subject_related_subject_id ON SubjectRelation(related_subject_id);
+
 CREATE TABLE IF NOT EXISTS SubjectPersons(
     person_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
@@ -373,6 +372,9 @@ CREATE TABLE IF NOT EXISTS SubjectPersons(
     -- FOREIGN KEY(person_id) REFERENCES Persons(id),
     -- FOREIGN KEY(subject_id) REFERENCES Subjects(id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_subject_persons_subject_id ON SubjectPersons(subject_id);
+CREATE INDEX IF NOT EXISTS idx_subject_persons_person_id ON SubjectPersons(person_id);
 
 CREATE TABLE IF NOT EXISTS SubjectCharacter(
     character_id INTEGER NOT NULL,
@@ -384,6 +386,9 @@ CREATE TABLE IF NOT EXISTS SubjectCharacter(
     -- FOREIGN KEY(subject_id) REFERENCES Subjects(id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_subject_character_subject_id ON SubjectCharacter(subject_id);
+CREATE INDEX IF NOT EXISTS idx_subject_character_character_id ON SubjectCharacter(character_id);
+
 CREATE TABLE IF NOT EXISTS PersonCharacter(
     person_id INTEGER NOT NULL,
     subject_id INTEGER NOT NULL,
@@ -394,6 +399,10 @@ CREATE TABLE IF NOT EXISTS PersonCharacter(
     -- FOREIGN KEY(subject_id) REFERENCES Subjects(id),
     -- FOREIGN KEY(character_id) REFERENCES Characters(id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_person_character_subject_id ON PersonCharacter(subject_id);
+CREATE INDEX IF NOT EXISTS idx_person_character_person_id ON PersonCharacter(person_id);
+CREATE INDEX IF NOT EXISTS idx_person_character_character_id ON PersonCharacter(character_id);
 """
 
 _CREATE_GRAPH_SQL = """
@@ -409,12 +418,6 @@ EDGE TABLES (
     PROPERTIES (relation_type)
     LABEL s2s,
 
-  PersonCharacter
-    SOURCE KEY (person_id) REFERENCES Persons (id)
-    DESTINATION KEY (character_id) REFERENCES Characters (id)
-    PROPERTIES (subject_id, summary)
-    LABEL p2sc,
-
   SubjectPersons
     SOURCE KEY (person_id) REFERENCES Persons (id)
     DESTINATION KEY (subject_id) REFERENCES Subjects (id)
@@ -427,4 +430,31 @@ EDGE TABLES (
     PROPERTIES (type)
     LABEL s2c
 );
+"""
+
+
+# unused "Engagement" graph edges
+# because it's more wieldly to query with non-graph SQL
+__UNUSED_GRAPH_SQL = """
+  -- DO NOT USE this edge type: experimental
+  PersonCharacter
+    SOURCE KEY (person_id) REFERENCES Persons (id)
+    DESTINATION KEY (character_id) REFERENCES Characters (id)
+    PROPERTIES (subject_id, summary)
+    LABEL p2c_s,
+
+  -- DO NOT USE this edge type: experimental
+  PersonCharacter
+    SOURCE KEY (subject_id) REFERENCES Subjects (id)
+    DESTINATION KEY (character_id) REFERENCES Characters (id)
+    PROPERTIES (person_id, summary)
+    LABEL s2c_p,
+
+  -- DO NOT USE this edge type: experimental
+  PersonCharacter
+    SOURCE KEY (person_id) REFERENCES Persons (id)
+    DESTINATION KEY (subject_id) REFERENCES Subjects (id)
+    PROPERTIES (character_id, summary)
+    LABEL p2s_c,
+
 """

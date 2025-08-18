@@ -47,14 +47,18 @@ async def test_search_empty_results_all_indexes(
     mock_es_client.search.return_value = mock_response
 
     # Test all indexes
-    char_results = await characters_index.search(CharactersIndexQuery(query="nonexistent"))
+    char_results = await characters_index.search(
+        CharactersIndexQuery(query="nonexistent")
+    )
     person_results = await persons_index.search(PersonsIndexQuery(query="nonexistent"))
-    episode_results = await episodes_index.search(EpisodesIndexQuery(query="nonexistent"))
+    episode_results = await episodes_index.search(
+        EpisodesIndexQuery(query="nonexistent")
+    )
 
     assert char_results.total == 0
     assert person_results.total == 0
     assert episode_results.total == 0
-    
+
     assert len(char_results.items) == 0
     assert len(person_results.items) == 0
     assert len(episode_results.items) == 0
@@ -88,7 +92,7 @@ async def test_search_invalid_data_handling_all_indexes(
                     }
                 },
             ],
-            "total": {"value": 2}
+            "total": {"value": 2},
         }
     }
 
@@ -114,7 +118,7 @@ async def test_search_invalid_data_handling_all_indexes(
                     }
                 },
             ],
-            "total": {"value": 2}
+            "total": {"value": 2},
         }
     }
 
@@ -142,7 +146,7 @@ async def test_search_invalid_data_handling_all_indexes(
                     }
                 },
             ],
-            "total": {"value": 2}
+            "total": {"value": 2},
         }
     }
 
@@ -160,7 +164,7 @@ async def test_search_invalid_data_handling_all_indexes(
     assert char_results.total == 2
     assert person_results.total == 2
     assert episode_results.total == 2
-    
+
     assert len(char_results.items) == 1
     assert len(person_results.items) == 1
     assert len(episode_results.items) == 1

@@ -24,7 +24,7 @@ async def test_search_persons_basic(persons_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -117,7 +117,7 @@ async def test_search_persons_pagination(persons_index, mock_es_client):
                 }
                 for i in range(1, 6)  # 5 results
             ],
-            "total": {"value": 25}  # Total of 25 results
+            "total": {"value": 25},  # Total of 25 results
         }
     }
 
@@ -173,7 +173,7 @@ async def test_search_persons_sorting(persons_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -264,7 +264,7 @@ async def test_search_persons_invalid_data_handling(persons_index, mock_es_clien
                     }
                 },
             ],
-            "total": {"value": 2}
+            "total": {"value": 2},
         }
     }
 

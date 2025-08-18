@@ -23,7 +23,7 @@ async def test_search_characters_basic(characters_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -50,7 +50,8 @@ async def test_search_characters_basic(characters_index, mock_es_client):
     # Verify query structure
     query_body = call_args[1]["body"]
     assert (
-        query_body["query"]["bool"]["must"][0]["multi_match"]["query"] == "test character"
+        query_body["query"]["bool"]["must"][0]["multi_match"]["query"]
+        == "test character"
     )
     assert query_body["size"] == 20  # default limit
     assert query_body["from"] == 0  # default offset
@@ -110,7 +111,7 @@ async def test_search_characters_pagination(characters_index, mock_es_client):
                 }
                 for i in range(1, 6)  # 5 results
             ],
-            "total": {"value": 25}  # Total of 25 results
+            "total": {"value": 25},  # Total of 25 results
         }
     }
 
@@ -165,7 +166,7 @@ async def test_search_characters_sorting(characters_index, mock_es_client):
                     }
                 }
             ],
-            "total": {"value": 1}
+            "total": {"value": 1},
         }
     }
 
@@ -230,7 +231,9 @@ async def test_search_characters_empty_query(characters_index, mock_es_client):
 
 
 @pytest.mark.asyncio
-async def test_search_characters_invalid_data_handling(characters_index, mock_es_client):
+async def test_search_characters_invalid_data_handling(
+    characters_index, mock_es_client
+):
     """Test search handles invalid data gracefully."""
     # Mock response with one valid and one invalid hit
     mock_response = {
@@ -254,7 +257,7 @@ async def test_search_characters_invalid_data_handling(characters_index, mock_es
                     }
                 },
             ],
-            "total": {"value": 2}
+            "total": {"value": 2},
         }
     }
 

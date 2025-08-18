@@ -17,6 +17,7 @@ class PersonsIndexQuery(BaseModel):
 
 class PersonSearchResult(SearchResult[model.Person]):
     """Result model for person search operations."""
+
     pass
 
 
@@ -71,7 +72,7 @@ class PersonIndex(BaseIndex[model.Person]):
 
         hits = response.get("hits", {}).get("hits", [])
         total = response.get("hits", {}).get("total", {}).get("value", 0)
-        
+
         persons = []
         for hit in hits:
             try:
@@ -82,14 +83,14 @@ class PersonIndex(BaseIndex[model.Person]):
                 continue
 
         has_more = (search_query.offset + search_query.limit) < total
-        
+
         return PersonSearchResult(
             items=persons,
             total=total,
             query=search_query.query,
             limit=search_query.limit,
             offset=search_query.offset,
-            has_more=has_more
+            has_more=has_more,
         )
 
     @property

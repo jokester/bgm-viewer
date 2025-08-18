@@ -118,8 +118,7 @@ class RdbRepository:
 
     def find_person_by_id(self, person_id: int) -> m.Person | None:
         with self._db_ref.open_db(read_only=False) as conn:
-            rows = conn.execute(
-                "SELECT * FROM Persons WHERE id = ?", (person_id,)).df()
+            rows = conn.execute("SELECT * FROM Persons WHERE id = ?", (person_id,)).df()
             if not len(rows):
                 return None
             return person_row_to_model(rows.iloc[0])
