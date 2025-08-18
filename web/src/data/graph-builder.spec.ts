@@ -1,5 +1,14 @@
 import { GraphBuilder } from './graph-builder';
-import { Subject, Character, Person, GraphEdgeSimple, Subgraph, SubjectType, PersonType, SubjectCharacterType } from './api';
+import {
+  Character,
+  GraphEdgeSimple,
+  Person,
+  PersonType,
+  Subgraph,
+  Subject,
+  SubjectCharacterType,
+  SubjectType,
+} from './api';
 import { List as IList, Map as IMap, Set as ISet } from 'immutable';
 
 // Helper functions to create valid test data matching OpenAPI specification
@@ -18,7 +27,7 @@ function createTestSubject(id: number, name: string, type: SubjectType = Subject
     score_details: null,
     rank: 1000,
     date: '2023-01-01',
-    favorite: { wish: 10, done: 50, doing: 20, on_hold: 5, dropped: 15 },
+    favorite: {wish: 10, done: 50, doing: 20, on_hold: 5, dropped: 15},
     series: false,
     meta_tags: null,
   };
@@ -181,7 +190,15 @@ describe('GraphBuilder', () => {
     it('should merge edges from subgraph', () => {
       const subject2 = createTestSubject(2, 'Test Subject 2');
       const engagementEdge = createTestGraphEdge(
-        1, null, 101, 201, null, null, null, null, 'Engagement 1'
+        1,
+        null,
+        101,
+        201,
+        null,
+        null,
+        null,
+        null,
+        'Engagement 1',
       );
 
       const subgraph: Subgraph = {

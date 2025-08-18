@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 import bgm_archive.loader.model as m
 from ihate_work.util.uniq_by import uniq_by
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -92,16 +93,15 @@ class Subgraph(BaseModel):
             assert self.center_person.id == other.center_person.id
         else:
             raise ValueError(
-                f"Cannot add subgraphs with different centers: {self.center_str} {other.center_str}")
+                f"Cannot add subgraphs with different centers: {self.center_str} {other.center_str}"
+            )
 
         return Subgraph(
             center_subject=self.center_subject,
             center_character=self.center_character,
             center_persion=self.center_person,
-            subjects=uniq_by(self.subjects + other.subjects,
-                             key=lambda s: s.id),
-            characters=uniq_by(self.characters +
-                               other.characters, key=lambda c: c.id),
+            subjects=uniq_by(self.subjects + other.subjects, key=lambda s: s.id),
+            characters=uniq_by(self.characters + other.characters, key=lambda c: c.id),
             persons=uniq_by(self.persons + other.persons, key=lambda p: p.id),
             edges=self.edges + other.edges,
         ).compact()

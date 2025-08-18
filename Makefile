@@ -30,6 +30,9 @@ full-db: deps
 ###
 ### SECTION dev scripts
 ###
+format: format-web format-py
+
+
 format-web:
 	pnpm run --filter=./web format
 
@@ -68,6 +71,7 @@ upgrade-deps:
 	venv/bin/pur -r requirements.txt --force --skip=$(FREEZE_PY_REQ)
 
 venv: venv/.venv_created
+	rm -fv venv/.deps_installed
 
 venv/.venv_created: Makefile
 	@# the 2nd most useful feature of uv

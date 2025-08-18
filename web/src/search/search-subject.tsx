@@ -351,8 +351,8 @@ export const SearchSubject = (props: {onResultClick?: (subject: Subject) => void
             : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {results.map((subject) => (
-                  <Card 
-                    key={subject.id} 
+                  <Card
+                    key={subject.id}
                     className='hover:shadow-lg transition-shadow cursor-pointer'
                     onClick={() => props.onResultClick?.(subject)}
                   >

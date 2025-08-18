@@ -267,8 +267,8 @@ export const SearchCharacter = (props: {onResultClick?: (character: Character) =
             : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {results.map((character) => (
-                  <Card 
-                    key={character.id} 
+                  <Card
+                    key={character.id}
                     className='character-card hover:shadow-lg transition-shadow cursor-pointer'
                     onClick={() => props.onResultClick?.(character)}
                   >

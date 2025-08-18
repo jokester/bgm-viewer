@@ -69,11 +69,7 @@ class GraphRepository:
             # Extract unique subjects from edges
             subjects = [from_subject] + [subject_row_to_model(s2) for s2, _ in rows]
 
-            return Subgraph(
-                center_subject=from_subject,
-                subjects=subjects,
-                edges=edges
-            )
+            return Subgraph(center_subject=from_subject, subjects=subjects, edges=edges)
 
     def expand_sp(self, subject1: m.Subject) -> Subgraph:
         """Expand s2p (subject to persons) edges from a given subject."""
@@ -104,7 +100,7 @@ class GraphRepository:
                 center_subject=subject1,
                 subjects=[subject1],
                 persons=persons,
-                edges=edges
+                edges=edges,
             )
 
     def expand_sc(self, subject: m.Subject) -> Subgraph:
@@ -137,7 +133,7 @@ class GraphRepository:
                 center_subject=subject,
                 subjects=[subject],
                 characters=characters,
-                edges=edges
+                edges=edges,
             )
 
     def expand_se(self, subject: m.Subject) -> Subgraph:
@@ -172,7 +168,7 @@ class GraphRepository:
                 subjects=[subject],
                 persons=persons,
                 characters=characters,
-                edges=edges
+                edges=edges,
             )
 
     def expand_cs(self, character: m.Character) -> Subgraph:
@@ -205,7 +201,7 @@ class GraphRepository:
                 center_character=character,
                 subjects=subjects,
                 characters=[character],
-                edges=edges
+                edges=edges,
             )
 
     def expand_ce(self, character: m.Character) -> Subgraph:
@@ -240,7 +236,7 @@ class GraphRepository:
                 subjects=subjects,
                 characters=[character],
                 persons=persons,
-                edges=edges
+                edges=edges,
             )
 
     def expand_ps(self, person: m.Person) -> Subgraph:
@@ -269,10 +265,7 @@ class GraphRepository:
             subjects = [subject_row_to_model(s) for s, _ in rows]
 
             return Subgraph(
-                center_person=person,
-                subjects=subjects,
-                persons=[person],
-                edges=edges
+                center_person=person, subjects=subjects, persons=[person], edges=edges
             )
 
     def expand_pe(self, person: m.Person) -> Subgraph:
@@ -307,5 +300,5 @@ class GraphRepository:
                 subjects=subjects,
                 characters=characters,
                 persons=[person],
-                edges=edges
+                edges=edges,
             )

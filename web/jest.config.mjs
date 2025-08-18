@@ -15,7 +15,7 @@ export default {
       '@swc-node/jest',
       {
         module: 'commonjs',
-      }
+      },
     ],
   },
 };

@@ -75,8 +75,7 @@ def build_app() -> FastAPI:
             results = await subjects_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.post("/characters/search", response_model=CharacterSearchResult)
     async def search_characters(search_query: CharactersIndexQuery):
@@ -85,8 +84,7 @@ def build_app() -> FastAPI:
             results = await char_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.post("/people/search", response_model=PersonSearchResult)
     async def search_people(search_query: PersonsIndexQuery):
@@ -95,8 +93,7 @@ def build_app() -> FastAPI:
             results = await person_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.post("/episodes/search", response_model=EpisodeSearchResult)
     async def search_episodes(search_query: EpisodesIndexQuery):
@@ -105,8 +102,7 @@ def build_app() -> FastAPI:
             results = await episode_index.search(search_query)
             return results
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Search failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
     @fastapi.get("/subjects/{subject_id}", response_model=m.Subject)
     def get_subject(subject_id: int):
