@@ -1,11 +1,11 @@
 import React from 'react';
 import { NetworkGraph } from './network-graph';
-import { Character, Subject, Person } from './data/api';
+import { Character, Subject, Person, SubjectType, PersonType } from './data/api';
 
 // Demo data
 const demoSubject: Subject = {
   id: 1,
-  type: 1, // ANIME
+  type: SubjectType.ANIME,
   name: "Demo Anime",
   name_cn: "演示动画",
   infobox: "",
@@ -14,38 +14,38 @@ const demoSubject: Subject = {
   nsfw: false,
   tags: [],
   score: 8.5,
+  score_details: null,
   rank: 100,
-  wish: 50,
-  done: 200,
-  doing: 30,
-  dropped: 5,
-  on_hold: 10,
-  created_at: "2024-01-01T00:00:00Z",
-  updated_at: "2024-01-01T00:00:00Z"
+  date: "2024-01-01",
+  favorite: {
+    wish: 50,
+    done: 200,
+    doing: 30,
+    dropped: 5,
+    on_hold: 10
+  },
+  series: false,
+  meta_tags: null
 };
 
 const demoCharacter: Character = {
   id: 101,
   name: "Demo Character",
-  name_cn: "演示角色",
   infobox: "",
   summary: "A demo character for testing",
-  nsfw: false,
-  created_at: "2024-01-01T00:00:00Z",
-  updated_at: "2024-01-01T00:00:00Z"
+  comments: 10,
+  collects: 100
 };
 
 const demoPerson: Person = {
   id: 201,
   name: "Demo Person",
-  name_cn: "演示人员",
+  type: PersonType.INDIVIDUAL,
+  career: ["Director"],
   infobox: "",
   summary: "A demo person for testing",
-  nsfw: false,
-  type: 0, // INDIVIDUAL
-  career: "Director",
-  created_at: "2024-01-01T00:00:00Z",
-  updated_at: "2024-01-01T00:00:00Z"
+  comments: 15,
+  collects: 200
 };
 
 export const NetworkGraphDemo: React.FC = () => {

@@ -173,8 +173,9 @@ describe('GraphBuilder', () => {
 
       const result = sampleBuilder.mergeSubgraph(subgraph);
 
-      // Should not overwrite existing subject
-      expect(result.subjects.get(1)).toEqual(subject1Updated);
+      // Should not overwrite existing subject - should keep the original
+      expect(result.subjects.get(1)).toEqual(sampleBuilder.subjects.get(1));
+      expect(result.subjects.get(1)).not.toEqual(subject1Updated);
     });
 
     it('should merge edges from subgraph', () => {

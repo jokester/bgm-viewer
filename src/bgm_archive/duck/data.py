@@ -1,6 +1,9 @@
+from sys import _clear_internal_caches
 from pydantic import BaseModel, Field
 import bgm_archive.loader.model as m
 from ihate_work.util.uniq_by import uniq_by
+import logging
+logger = logging.getLogger(__name__)
 
 
 class GraphEdge(BaseModel):
@@ -69,6 +72,17 @@ class Subgraph(BaseModel):
 
     edges: list[GraphEdgeSimple]
 
+    @property
+    def center_str(self) -> str:
+        if self.center_subject:
+            return f"Subject(id={self.center_subject.id})"
+        elif self.center_character:
+            return f"Character(id={self.center_character.id}"
+        elif self.center_person:
+            return f"Person(id={self.center_person.id}"
+        else:
+            return "No center"
+
     def __add__(self, other: "Subgraph") -> "Subgraph":
         if self.center_subject and other.center_subject:
             assert self.center_subject.id == other.center_subject.id
@@ -77,9 +91,13 @@ class Subgraph(BaseModel):
         elif self.center_person and other.center_person:
             assert self.center_person.id == other.center_person.id
         else:
-            raise ValueError("Cannot add subgraphs with different centers")
+            raise ValueError(
+                f"Cannot add subgraphs with different centers: {self.center_str} {other.center_str}")
 
         return Subgraph(
+            center_subject=self.center_subject,
+            center_character=self.center_character,
+            center_persion=self.center_person,
             subjects=uniq_by(self.subjects + other.subjects,
                              key=lambda s: s.id),
             characters=uniq_by(self.characters +
@@ -94,6 +112,9 @@ class Subgraph(BaseModel):
         This is useful to ensure that the subgraph does not contain duplicates.
         """
         return Subgraph(
+            center_subject=self.center_subject,
+            center_character=self.center_character,
+            center_persion=self.center_person,
             subjects=uniq_by(self.subjects, key=lambda s: s.id),
             characters=uniq_by(self.characters, key=lambda c: c.id),
             persons=uniq_by(self.persons, key=lambda p: p.id),

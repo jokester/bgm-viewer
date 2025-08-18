@@ -28,79 +28,67 @@ export function NetworkPage(props: PageProps) {
 
   const handleSubjectClick = async (subject: Subject) => {
     console.log('Subject clicked:', subject);
-    // TODO: Add subject to graph or navigate to subject page
-  };
-
-  const handleCharacterClick = (character: Character) => {
-    console.log('Character clicked:', character);
-    // TODO: Add character to graph or navigate to character page
-  };
-
-  const handlePersonClick = (person: Person) => {
-    console.log('Person clicked:', person);
-    // TODO: Add person to graph or navigate to person page
-  };
-
-  const handleSearchResultClick = (result: Subject | Character | Person) => {
-    // Create a subgraph from the search result and add it to the graph
-    let subgraph: Subgraph;
     
-    if ('type' in result && 'platform' in result) {
-      // This is a Subject
-      subgraph = {
-        center_subject: result as Subject,
-        center_character: null,
-        center_person: null,
-        subjects: [result as Subject],
-        characters: [],
-        persons: [],
-        edges: []
-      };
-    } else if ('career' in result) {
-      // This is a Person
-      subgraph = {
-        center_subject: null,
-        center_character: null,
-        center_person: result as Person,
-        subjects: [],
-        characters: [],
-        persons: [result as Person],
-        edges: []
-      };
-    } else {
-      // This is a Character
-      subgraph = {
-        center_subject: null,
-        center_character: result as Character,
-        center_person: null,
-        subjects: [],
-        characters: [result as Character],
-        persons: [],
-        edges: []
-      };
+    try {
+      // Call API to expand subject and get related entities
+      const subgraph = await bgmApi.getSubjectEdges(subject.id);
+      
+      // Add the expanded subgraph to the network graph
+      if (networkGraphRef.current) {
+        networkGraphRef.current.addSubgraph(subgraph);
+      }
+    } catch (error) {
+      console.error('Failed to expand subject:', error);
     }
+  };
 
-    // Add the subgraph directly to the network graph via ref
-    if (networkGraphRef.current) {
-      networkGraphRef.current.addSubgraph(subgraph);
+  const handleCharacterClick = async (character: Character) => {
+    console.log('Character clicked:', character);
+    
+    try {
+      // Call API to expand character and get related entities
+      const subgraph = await bgmApi.getCharacterEdges(character.id);
+      
+      // Add the expanded subgraph to the network graph
+      if (networkGraphRef.current) {
+        networkGraphRef.current.addSubgraph(subgraph);
+      }
+    } catch (error) {
+      console.error('Failed to expand character:', error);
+    }
+  };
+
+  const handlePersonClick = async (person: Person) => {
+    console.log('Person clicked:', person);
+    
+    try {
+      // Call API to expand person and get related entities
+      const subgraph = await bgmApi.getPersonEdges(person.id);
+      
+      // Add the expanded subgraph to the network graph
+      if (networkGraphRef.current) {
+        networkGraphRef.current.addSubgraph(subgraph);
+      }
+    } catch (error) {
+      console.error('Failed to expand person:', error);
     }
   };
 
   const clearGraph = () => {
     // Force a re-render of the NetworkGraph component by changing the key
-    // setGraphKey(prev => prev + 1);
+    setGraphKey(prev => prev + 1);
   };
 
   const renderSearchComponent = () => {
     switch (selectedSearchType) {
       case 'subject':
-        return <SearchSubject onResultClick={handleSearchResultClick} />;
+        return <SearchSubject onResultClick={handleSubjectClick} />;
       case 'character':
-        return <SearchCharacter onResultClick={handleSearchResultClick} />;
+        return <SearchCharacter onResultClick={handleCharacterClick} />;
       case 'person':
-        return <SearchPerson onResultClick={handleSearchResultClick} />;
+        return <SearchPerson onResultClick={handlePersonClick} />;
       default:
-        return <SearchSubject onResultClick={handleSearchResultClick} />;
+        return null;
     }
   };
 
