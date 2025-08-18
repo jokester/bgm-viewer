@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Union
 
 
-def subject_row_to_model(row: pd.Series) -> m.Subject:
+def subject_row_to_model(row: pd.Series | dict) -> m.Subject:
     """Convert a DuckDB table row to a Subject model.
 
     The DuckDB table stores some fields differently than the model expects:
@@ -45,7 +45,7 @@ def subject_row_to_model(row: pd.Series) -> m.Subject:
     return m.Subject.model_validate(subject_dict)
 
 
-def character_row_to_model(row: pd.Series) -> m.Character:
+def character_row_to_model(row: pd.Series | dict) -> m.Character:
     """Convert a DuckDB table row to a Character model."""
     return m.Character.model_validate(
         {
@@ -60,7 +60,7 @@ def character_row_to_model(row: pd.Series) -> m.Character:
     )
 
 
-def person_row_to_model(row: pd.Series) -> m.Person:
+def person_row_to_model(row: pd.Series | dict) -> m.Person:
     """Convert a DuckDB table row to a Person model."""
     return m.Person.model_validate(
         {
@@ -76,7 +76,7 @@ def person_row_to_model(row: pd.Series) -> m.Person:
     )
 
 
-def episode_row_to_model(row: pd.Series) -> m.Episode:
+def episode_row_to_model(row: pd.Series | dict) -> m.Episode:
     """Convert a DuckDB table row to an Episode model."""
     return m.Episode.model_validate(
         {

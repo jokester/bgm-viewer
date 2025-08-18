@@ -1,8 +1,8 @@
 import bgm_archive.loader.model as m
 from .conn import DuckDbRef
 from pathlib import Path
-from .data import GraphEdge
-from .rdb_repo import RdbRepository, person_row_to_model, subject_row_to_model, character_row_to_model
+from .data import GraphEdge, Subgraph, GraphEdgeSimple
+from .rdb_repo import person_row_to_model, subject_row_to_model, character_row_to_model
 import logging
 import pandas as pd
 
@@ -39,12 +39,12 @@ S2S AS (
 
 
 class GraphRepository:
-    """Provide "graph expansion" methods to query a graph. A expand_* call returns a list of GraphEdge"""
-    def __init__(self, db: DuckDbRef | str | Path, rdb: RdbRepository):
-        self.__db = DuckDbRef.from_db(db)
-        self.__rdb = rdb
+    """Provide "graph expansion" methods to query a graph. A expand_* call returns a Subgraph"""
 
-    def expand_s2s(self, from_subject: m.Subject) -> list[GraphEdge]:
+    def __init__(self, db: DuckDbRef | str | Path):
+        self.__db = DuckDbRef.from_db(db)
+
+    def expand_s2s(self, from_subject: m.Subject) -> Subgraph:
         """Expand s2s (subject to subject) edges from a given subject."""
         assert isinstance(from_subject, m.Subject)
         query = f"""WITH {_ctes}
@@ -53,21 +53,25 @@ class GraphRepository:
             WHERE s1.id = $sId
             """
         with self.__db.open_db(read_only=False) as conn:
-            rows: list[tuple[int, int, int]] = conn.execute(
-                query, parameters={'sId': from_subject.id}
+            rows: list[tuple[dict, int]] = conn.execute(
+                query, parameters={"sId": from_subject.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    subject1=from_subject,
-                    subject2=subject_row_to_model(s2),
+                GraphEdgeSimple(
+                    subject1_id=from_subject.id,
+                    subject2_id=subject_row_to_model(s2).id,
                     s2s_relation_type=m.SubjectRelationType(subject_relation_type),
                 )
                 for s2, subject_relation_type in rows
             ]
-            return edges
 
-    def expand_s2p(self, subject1: m.Subject) -> list[GraphEdge]:
+            # Extract unique subjects from edges
+            subjects = [from_subject] + [subject_row_to_model(s2) for s2, _ in rows]
+
+            return Subgraph(subjects=subjects, edges=edges)
+
+    def expand_sp(self, subject1: m.Subject) -> Subgraph:
         """Expand s2p (subject to persons) edges from a given subject."""
         assert isinstance(subject1, m.Subject)
         query = f"""WITH {_ctes}
@@ -77,20 +81,24 @@ class GraphRepository:
             """
         with self.__db.open_db(read_only=False) as conn:
             rows: list[tuple[pd.Series, int]] = conn.execute(
-                query, parameters={'sId': subject1.id}
+                query, parameters={"sId": subject1.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    subject1=subject1,
-                    person=person_row_to_model(p),
+                GraphEdgeSimple(
+                    subject1_id=subject1.id,
+                    person_id=person_row_to_model(p).id,
                     sp_position=m.SubjectPersonType.from_value(position),
                 )
                 for p, position in rows
             ]
-            return edges
-    
-    def expand_s2c(self, subject: m.Subject) -> list[GraphEdge]:
+
+            # Extract unique persons from edges
+            persons = [person_row_to_model(p) for p, _ in rows]
+
+            return Subgraph(subjects=[subject1], persons=persons, edges=edges)
+
+    def expand_sc(self, subject: m.Subject) -> Subgraph:
         """Expand s2c (subject to characters) edges from a given subject."""
         assert isinstance(subject, m.Subject)
         query = f"""WITH {_ctes}
@@ -100,21 +108,25 @@ class GraphRepository:
             """
         with self.__db.open_db(read_only=False) as conn:
             rows: list[tuple[pd.Series, int, int]] = conn.execute(
-                query, parameters={'sId': subject.id}
+                query, parameters={"sId": subject.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    subject1=subject,
-                    character=character_row_to_model(c),
+                GraphEdgeSimple(
+                    subject1_id=subject.id,
+                    character_id=character_row_to_model(c).id,
                     sc_type=m.SubjectCharacterType(sc_type),
                     sc_order_idx=order_idx,
                 )
                 for c, sc_type, order_idx in rows
             ]
-            return edges
-    
-    def expand_s2e(self, subject: m.Subject) -> list[GraphEdge]:
+
+            # Extract unique characters from edges
+            characters = [character_row_to_model(c) for c, _, _ in rows]
+
+            return Subgraph(subjects=[subject], characters=characters, edges=edges)
+
+    def expand_se(self, subject: m.Subject) -> Subgraph:
         """Expand s2e (subject to engagements) edges from a given subject."""
         assert isinstance(subject, m.Subject)
         query = f"""WITH {_ctes}
@@ -124,21 +136,28 @@ class GraphRepository:
             """
         with self.__db.open_db(read_only=False) as conn:
             rows: list[tuple[pd.Series, pd.Series, str]] = conn.execute(
-                query, parameters={'sId': subject.id}
+                query, parameters={"sId": subject.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    subject1=subject,
-                    person=person_row_to_model(p),
-                    character=character_row_to_model(c),
+                GraphEdgeSimple(
+                    subject1_id=subject.id,
+                    person_id=person_row_to_model(p).id,
+                    character_id=character_row_to_model(c).id,
                     engagement_summary=summary,
                 )
                 for p, c, summary in rows
             ]
-            return edges
 
-    def expand_c2s(self, character: m.Character) -> list[GraphEdge]:
+            # Extract unique persons and characters from edges
+            persons = [person_row_to_model(p) for p, _, _ in rows]
+            characters = [character_row_to_model(c) for _, c, _ in rows]
+
+            return Subgraph(
+                subjects=[subject], persons=persons, characters=characters, edges=edges
+            )
+
+    def expand_cs(self, character: m.Character) -> Subgraph:
         """Expand c2s (character to subjects) edges from a given character."""
         assert isinstance(character, m.Character)
         query = f"""WITH {_ctes}
@@ -148,21 +167,25 @@ class GraphRepository:
             """
         with self.__db.open_db(read_only=False) as conn:
             rows: list[tuple[pd.Series, int, int]] = conn.execute(
-                query, parameters={'cId': character.id}
+                query, parameters={"cId": character.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    character=character,
-                    subject2=subject_row_to_model(s),
+                GraphEdgeSimple(
+                    character_id=character.id,
+                    subject2_id=subject_row_to_model(s).id,
                     sc_type=m.SubjectCharacterType(sc_type),
                     sc_order_idx=order_idx,
                 )
                 for s, sc_type, order_idx in rows
             ]
-            return edges
-    
-    def expand_c2e(self, character: m.Character) -> list[GraphEdge]:
+
+            # Extract unique subjects from edges
+            subjects = [subject_row_to_model(s) for s, _, _ in rows]
+
+            return Subgraph(subjects=subjects, characters=[character], edges=edges)
+
+    def expand_ce(self, character: m.Character) -> Subgraph:
         """Expand c2e (character to engagements) edges from a given character."""
         assert isinstance(character, m.Character)
         query = f"""WITH {_ctes}
@@ -172,21 +195,28 @@ class GraphRepository:
             """
         with self.__db.open_db(read_only=False) as conn:
             rows: list[tuple[pd.Series, pd.Series, str]] = conn.execute(
-                query, parameters={'cId': character.id}
+                query, parameters={"cId": character.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    character=character,
-                    person=person_row_to_model(p),
-                    subject2=subject_row_to_model(s),
+                GraphEdgeSimple(
+                    character_id=character.id,
+                    person_id=person_row_to_model(p).id,
+                    subject2_id=subject_row_to_model(s).id,
                     engagement_summary=summary,
                 )
                 for p, s, summary in rows
             ]
-            return edges
 
-    def expand_p2s(self, person: m.Person) -> list[GraphEdge]:
+            # Extract unique persons and subjects from edges
+            persons = [person_row_to_model(p) for p, _, _ in rows]
+            subjects = [subject_row_to_model(s) for _, s, _ in rows]
+
+            return Subgraph(
+                subjects=subjects, characters=[character], persons=persons, edges=edges
+            )
+
+    def expand_ps(self, person: m.Person) -> Subgraph:
         """Expand p2s (person to subjects) edges from a given person."""
         assert isinstance(person, m.Person)
         query = f"""WITH {_ctes}
@@ -196,20 +226,24 @@ class GraphRepository:
             """
         with self.__db.open_db(read_only=False) as conn:
             rows: list[tuple[pd.Series, int]] = conn.execute(
-                query, parameters={'pId': person.id}
+                query, parameters={"pId": person.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    person=person,
-                    subject2=subject_row_to_model(s),
+                GraphEdgeSimple(
+                    person_id=person.id,
+                    subject2_id=subject_row_to_model(s).id,
                     sp_position=m.SubjectPersonType.from_value(position),
                 )
                 for s, position in rows
             ]
-            return edges
-    
-    def expand_p2e(self, person: m.Person) -> list[GraphEdge]:
+
+            # Extract unique subjects from edges
+            subjects = [subject_row_to_model(s) for s, _ in rows]
+
+            return Subgraph(subjects=subjects, persons=[person], edges=edges)
+
+    def expand_pe(self, person: m.Person) -> Subgraph:
         """Expand p2e (person to engagements) edges from a given person."""
         assert isinstance(person, m.Person)
         query = f"""WITH {_ctes}
@@ -219,16 +253,23 @@ class GraphRepository:
             """
         with self.__db.open_db(read_only=False) as conn:
             rows: list[tuple[pd.Series, pd.Series, str]] = conn.execute(
-                query, parameters={'pId': person.id}
+                query, parameters={"pId": person.id}
             ).fetchall()
 
             edges = [
-                GraphEdge(
-                    person=person,
-                    character=character_row_to_model(c),
-                    subject2=subject_row_to_model(s),
+                GraphEdgeSimple(
+                    person_id=person.id,
+                    character_id=character_row_to_model(c).id,
+                    subject2_id=subject_row_to_model(s).id,
                     engagement_summary=summary,
                 )
                 for c, s, summary in rows
             ]
-            return edges
+
+            # Extract unique characters and subjects from edges
+            characters = [character_row_to_model(c) for c, _, _ in rows]
+            subjects = [subject_row_to_model(s) for _, s, _ in rows]
+
+            return Subgraph(
+                subjects=subjects, characters=characters, persons=[person], edges=edges
+            )

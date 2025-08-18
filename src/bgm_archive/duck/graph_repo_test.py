@@ -1,12 +1,12 @@
 import os
 import pytest
 
-from bgm_archive.duck.data import GraphEdge
 from .graph_repo import GraphRepository
 from .rdb_repo import RdbRepository
+from .data import Subgraph, GraphEdgeSimple
 
 _rdb_repo = RdbRepository(db=os.environ["TEST_DUCKDB"])
-repo = GraphRepository(db=os.environ["TEST_DUCKDB"], rdb=_rdb_repo)
+repo = GraphRepository(db=os.environ["TEST_DUCKDB"])
 
 
 def test_expand_s2s():
@@ -16,9 +16,11 @@ def test_expand_s2s():
     if subject is None:
         pytest.skip("Subject with ID 1 not found in test database")
 
-    edges = repo.expand_s2s(subject)
-    assert edges is not None
-    assert isinstance(edges, list)
+    subgraph = repo.expand_s2s(subject)
+    assert subgraph is not None
+    assert isinstance(subgraph, Subgraph)
+    assert isinstance(subgraph.edges, list)
+    assert isinstance(subgraph.subjects, list)
 
     # Test with subject that has no relations
     subject_no_relations = _rdb_repo.find_subject_by_id(999999)
@@ -43,8 +45,10 @@ def test_expand_s2s():
             series=False,
         )
 
-    edges = repo.expand_s2s(subject_no_relations)
-    assert edges == []
+    subgraph = repo.expand_s2s(subject_no_relations)
+    assert isinstance(subgraph, Subgraph)
+    assert subgraph.edges == []
+    assert len(subgraph.subjects) == 1  # Only the starting subject
 
 
 def test_expand_s2s_invalid_input():
@@ -66,9 +70,12 @@ def test_expand_s2c():
     if subject is None:
         pytest.skip("Subject with ID 1 not found in test database")
 
-    edges = repo.expand_s2c(subject)
-    assert edges is not None
-    assert isinstance(edges, list)
+    subgraph = repo.expand_sc(subject)
+    assert subgraph is not None
+    assert isinstance(subgraph, Subgraph)
+    assert isinstance(subgraph.edges, list)
+    assert isinstance(subgraph.subjects, list)
+    assert isinstance(subgraph.characters, list)
 
     # Test with subject that has no character relations
     subject_no_relations = _rdb_repo.find_subject_by_id(999999)
@@ -93,8 +100,11 @@ def test_expand_s2c():
             series=False,
         )
 
-    edges = repo.expand_s2c(subject_no_relations)
-    assert edges == []
+    subgraph = repo.expand_sc(subject_no_relations)
+    assert isinstance(subgraph, Subgraph)
+    assert subgraph.edges == []
+    assert len(subgraph.subjects) == 1  # Only the starting subject
+    assert subgraph.characters == []
 
 
 def test_expand_s2p():
@@ -104,9 +114,12 @@ def test_expand_s2p():
     if subject is None:
         pytest.skip("Subject with ID 1 not found in test database")
 
-    edges = repo.expand_s2p(subject)
-    assert edges is not None
-    assert isinstance(edges, list)
+    subgraph = repo.expand_sp(subject)
+    assert subgraph is not None
+    assert isinstance(subgraph, Subgraph)
+    assert isinstance(subgraph.edges, list)
+    assert isinstance(subgraph.subjects, list)
+    assert isinstance(subgraph.persons, list)
 
     # Test with subject that has no person relations
     subject_no_relations = _rdb_repo.find_subject_by_id(999999)
@@ -131,20 +144,23 @@ def test_expand_s2p():
             series=False,
         )
 
-    edges = repo.expand_s2p(subject_no_relations)
-    assert edges == []
+    subgraph = repo.expand_sp(subject_no_relations)
+    assert isinstance(subgraph, Subgraph)
+    assert subgraph.edges == []
+    assert len(subgraph.subjects) == 1  # Only the starting subject
+    assert subgraph.persons == []
 
 
 def test_expand_s2p_invalid_input():
     """Test expand_s2p with invalid input."""
     with pytest.raises(AssertionError):
-        repo.expand_s2p(0)
+        repo.expand_sp(0)
 
     with pytest.raises(AssertionError):
-        repo.expand_s2p(-1)
+        repo.expand_sp(-1)
 
     with pytest.raises(AssertionError):
-        repo.expand_s2p("invalid")
+        repo.expand_sp("invalid")
 
 
 def test_expand_s2e():
@@ -154,9 +170,13 @@ def test_expand_s2e():
     if subject is None:
         pytest.skip("Subject with ID 1 not found in test database")
 
-    edges = repo.expand_s2e(subject)
-    assert edges is not None
-    assert isinstance(edges, list)
+    subgraph = repo.expand_se(subject)
+    assert subgraph is not None
+    assert isinstance(subgraph, Subgraph)
+    assert isinstance(subgraph.edges, list)
+    assert isinstance(subgraph.subjects, list)
+    assert isinstance(subgraph.persons, list)
+    assert isinstance(subgraph.characters, list)
 
     # Test with subject that has no engagement relations
     subject_no_relations = _rdb_repo.find_subject_by_id(999999)
@@ -181,20 +201,24 @@ def test_expand_s2e():
             series=False,
         )
 
-    edges = repo.expand_s2e(subject_no_relations)
-    assert edges == []
+    subgraph = repo.expand_se(subject_no_relations)
+    assert isinstance(subgraph, Subgraph)
+    assert subgraph.edges == []
+    assert len(subgraph.subjects) == 1  # Only the starting subject
+    assert subgraph.persons == []
+    assert subgraph.characters == []
 
 
 def test_expand_s2e_invalid_input():
     """Test expand_s2e with invalid input."""
     with pytest.raises(AssertionError):
-        repo.expand_s2e(0)
+        repo.expand_se(0)
 
     with pytest.raises(AssertionError):
-        repo.expand_s2e(-1)
+        repo.expand_se(-1)
 
     with pytest.raises(AssertionError):
-        repo.expand_s2e("invalid")
+        repo.expand_se("invalid")
 
 
 def test_expand_c2s():
@@ -204,9 +228,12 @@ def test_expand_c2s():
     if character is None:
         pytest.skip("Character with ID 1 not found in test database")
 
-    edges = repo.expand_c2s(character)
-    assert edges is not None
-    assert isinstance(edges, list)
+    subgraph = repo.expand_cs(character)
+    assert subgraph is not None
+    assert isinstance(subgraph, Subgraph)
+    assert isinstance(subgraph.edges, list)
+    assert isinstance(subgraph.subjects, list)
+    assert isinstance(subgraph.characters, list)
 
     # Test with character that has no subject relations
     character_no_relations = _rdb_repo.find_character_by_id(999999)
@@ -224,20 +251,23 @@ def test_expand_c2s():
             collects=0,
         )
 
-    edges = repo.expand_c2s(character_no_relations)
-    assert edges == []
+    subgraph = repo.expand_cs(character_no_relations)
+    assert isinstance(subgraph, Subgraph)
+    assert subgraph.edges == []
+    assert subgraph.subjects == []
+    assert len(subgraph.characters) == 1  # Only the starting character
 
 
 def test_expand_c2s_invalid_input():
     """Test expand_c2s with invalid input."""
     with pytest.raises(AssertionError):
-        repo.expand_c2s(0)
+        repo.expand_cs(0)
 
     with pytest.raises(AssertionError):
-        repo.expand_c2s(-1)
+        repo.expand_cs(-1)
 
     with pytest.raises(AssertionError):
-        repo.expand_c2s("invalid")
+        repo.expand_cs("invalid")
 
 
 def test_expand_p2s():
@@ -247,9 +277,12 @@ def test_expand_p2s():
     if person is None:
         pytest.skip("Person with ID 1 not found in test database")
 
-    edges = repo.expand_p2s(person)
-    assert edges is not None
-    assert isinstance(edges, list)
+    subgraph = repo.expand_ps(person)
+    assert subgraph is not None
+    assert isinstance(subgraph, Subgraph)
+    assert isinstance(subgraph.edges, list)
+    assert isinstance(subgraph.subjects, list)
+    assert isinstance(subgraph.persons, list)
 
     # Test with person that has no subject relations
     person_no_relations = _rdb_repo.find_person_by_id(999999)
@@ -268,20 +301,23 @@ def test_expand_p2s():
             collects=0,
         )
 
-    edges = repo.expand_p2s(person_no_relations)
-    assert edges == []
+    subgraph = repo.expand_ps(person_no_relations)
+    assert isinstance(subgraph, Subgraph)
+    assert subgraph.edges == []
+    assert subgraph.subjects == []
+    assert len(subgraph.persons) == 1  # Only the starting person
 
 
 def test_expand_p2s_invalid_input():
     """Test expand_p2s with invalid input."""
     with pytest.raises(AssertionError):
-        repo.expand_p2s(0)
+        repo.expand_ps(0)
 
     with pytest.raises(AssertionError):
-        repo.expand_p2s(-1)
+        repo.expand_ps(-1)
 
     with pytest.raises(AssertionError):
-        repo.expand_p2s("invalid")
+        repo.expand_ps("invalid")
 
 
 def test_graph_edge_structure():
@@ -291,27 +327,31 @@ def test_graph_edge_structure():
     if subject is None:
         pytest.skip("Subject with ID 1 not found in test database")
 
-    edges = repo.expand_s2s(subject)
-    if edges:
-        edge = edges[0]
+    subgraph = repo.expand_s2s(subject)
+    if subgraph.edges:
+        edge = subgraph.edges[0]
+        assert isinstance(edge, GraphEdgeSimple)
         assert hasattr(edge, "s2s_relation_type")
 
     # Test s2c edges
-    edges = repo.expand_s2c(subject)
-    if edges:
-        edge = edges[0]
+    subgraph = repo.expand_sc(subject)
+    if subgraph.edges:
+        edge = subgraph.edges[0]
+        assert isinstance(edge, GraphEdgeSimple)
         assert hasattr(edge, "sc_type")
 
     # Test s2p edges
-    edges = repo.expand_s2p(subject)
-    if edges:
-        edge = edges[0]
+    subgraph = repo.expand_sp(subject)
+    if subgraph.edges:
+        edge = subgraph.edges[0]
+        assert isinstance(edge, GraphEdgeSimple)
         assert hasattr(edge, "sp_position")
 
     # Test s2e edges
-    edges = repo.expand_s2e(subject)
-    if edges:
-        edge = edges[0]
+    subgraph = repo.expand_se(subject)
+    if subgraph.edges:
+        edge = subgraph.edges[0]
+        assert isinstance(edge, GraphEdgeSimple)
         assert hasattr(edge, "engagement_summary")
 
     # Test c2s edges
@@ -319,9 +359,10 @@ def test_graph_edge_structure():
     if character is None:
         pytest.skip("Character with ID 1 not found in test database")
 
-    edges = repo.expand_c2s(character)
-    if edges:
-        edge = edges[0]
+    subgraph = repo.expand_cs(character)
+    if subgraph.edges:
+        edge = subgraph.edges[0]
+        assert isinstance(edge, GraphEdgeSimple)
         assert hasattr(edge, "sc_type")
 
     # Test p2s edges
@@ -329,14 +370,15 @@ def test_graph_edge_structure():
     if person is None:
         pytest.skip("Person with ID 1 not found in test database")
 
-    edges = repo.expand_p2s(person)
-    if edges:
-        edge = edges[0]
+    subgraph = repo.expand_ps(person)
+    if subgraph.edges:
+        edge = subgraph.edges[0]
+        assert isinstance(edge, GraphEdgeSimple)
         assert hasattr(edge, "sp_position")
 
 
 def test_empty_results():
-    """Test that methods return empty lists for non-existent IDs."""
+    """Test that methods return empty subgraphs for non-existent IDs."""
     # Create dummy entities for testing
     import bgm_archive.loader.model as m
 
@@ -378,9 +420,39 @@ def test_empty_results():
         collects=0,
     )
 
-    assert repo.expand_s2s(non_existent_subject) == []
-    assert repo.expand_s2c(non_existent_subject) == []
-    assert repo.expand_s2p(non_existent_subject) == []
-    assert repo.expand_s2e(non_existent_subject) == []
-    assert repo.expand_c2s(non_existent_character) == []
-    assert repo.expand_p2s(non_existent_person) == []
+    # Test that all methods return Subgraph objects with empty edges
+    s2s_subgraph = repo.expand_s2s(non_existent_subject)
+    assert isinstance(s2s_subgraph, Subgraph)
+    assert s2s_subgraph.edges == []
+    assert len(s2s_subgraph.subjects) == 1  # Only the starting subject
+
+    sc_subgraph = repo.expand_sc(non_existent_subject)
+    assert isinstance(sc_subgraph, Subgraph)
+    assert sc_subgraph.edges == []
+    assert len(sc_subgraph.subjects) == 1  # Only the starting subject
+    assert sc_subgraph.characters == []
+
+    sp_subgraph = repo.expand_sp(non_existent_subject)
+    assert isinstance(sp_subgraph, Subgraph)
+    assert sp_subgraph.edges == []
+    assert len(sp_subgraph.subjects) == 1  # Only the starting subject
+    assert sp_subgraph.persons == []
+
+    se_subgraph = repo.expand_se(non_existent_subject)
+    assert isinstance(se_subgraph, Subgraph)
+    assert se_subgraph.edges == []
+    assert len(se_subgraph.subjects) == 1  # Only the starting subject
+    assert se_subgraph.persons == []
+    assert se_subgraph.characters == []
+
+    cs_subgraph = repo.expand_cs(non_existent_character)
+    assert isinstance(cs_subgraph, Subgraph)
+    assert cs_subgraph.edges == []
+    assert cs_subgraph.subjects == []
+    assert len(cs_subgraph.characters) == 1  # Only the starting character
+
+    ps_subgraph = repo.expand_ps(non_existent_person)
+    assert isinstance(ps_subgraph, Subgraph)
+    assert ps_subgraph.edges == []
+    assert ps_subgraph.subjects == []
+    assert len(ps_subgraph.persons) == 1  # Only the starting person

@@ -1,12 +1,11 @@
 import os
 from typing import Callable
-from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import dotenv
 import concurrent.futures as cf
 
-from bgm_archive.duck import RdbRepository, GraphEdge, Subgraph, GraphRepository
+from bgm_archive.duck import RdbRepository, GraphEdge, GraphRepository, Subgraph
 from bgm_archive.es import (
     SubjectsIndex,
     SubjectsIndexQuery,
@@ -28,7 +27,7 @@ import asyncio
 dotenv.load_dotenv()
 
 rdb = RdbRepository(db=os.environ["DUCKDB_PATH"])
-gdb = GraphRepository(db=os.environ["DUCKDB_PATH"], rdb=rdb)
+gdb = GraphRepository(db=os.environ["DUCKDB_PATH"])
 
 thread_pool = cf.ThreadPoolExecutor(
     max_workers=int(os.environ.get("THREAD_POOL_SIZE", 10))
@@ -126,12 +125,14 @@ def build_app() -> FastAPI:
         subject = rdb.find_subject_by_id(subject_id)
         if subject is None:
             raise HTTPException(status_code=404, detail="Subject not found")
-        s2s_edges, s2c_edges, s2p_edges = await asyncio.gather(
+        s2s_subgraph, s2c_subgraph, s2p_subgraph = await asyncio.gather(
             in_thread(lambda: gdb.expand_s2s(subject)),
-            in_thread(lambda: gdb.expand_s2c(subject)),
-            in_thread(lambda: gdb.expand_s2p(subject)),
+            in_thread(lambda: gdb.expand_sc(subject)),
+            in_thread(lambda: gdb.expand_sp(subject)),
         )
-        return Subgraph(from_subject=subject, edges=s2s_edges + s2c_edges + s2p_edges)
+        # Combine all subgraphs into one
+        combined_subgraph = s2s_subgraph + s2c_subgraph + s2p_subgraph
+        return combined_subgraph
 
     @fastapi.get("/characters/{character_id}", response_model=m.Character)
     def get_character(character_id: int):
@@ -150,11 +151,13 @@ def build_app() -> FastAPI:
         character = rdb.find_character_by_id(character_id)
         if character is None:
             raise HTTPException(status_code=404, detail="Character not found")
-        c2s_edges, c2p_edges = await asyncio.gather(
+        cs_subgraph, ce_subgraph = await asyncio.gather(
             in_thread(lambda: gdb.expand_cs(character)),
-            in_thread(lambda: gdb.expand_c2p(character)),
+            in_thread(lambda: gdb.expand_ce(character)),
         )
-        return Subgraph(from_character=character, edges=c2p_edges)
+        # Combine all subgraphs into one
+        combined_subgraph = cs_subgraph + ce_subgraph
+        return combined_subgraph
 
     @fastapi.get("/people/{person_id}", response_model=m.Person)
     def get_person(person_id: int):
@@ -173,11 +176,13 @@ def build_app() -> FastAPI:
         person = rdb.find_person_by_id(person_id)
         if person is None:
             raise HTTPException(status_code=404, detail="Person not found")
-        p2s_edges, p2c_edges = await asyncio.gather(
-            in_thread(lambda: gdb.expand_p2s(person)),
-            in_thread(lambda: gdb.expand_p2c(person)),
+        ps_subgraph, pe_subgraph = await asyncio.gather(
+            in_thread(lambda: gdb.expand_ps(person)),
+            in_thread(lambda: gdb.expand_pe(person)),
         )
-        return Subgraph(from_person=person, edges=p2s_edges + p2c_edges)
+        # Combine all subgraphs into one
+        combined_subgraph = ps_subgraph + pe_subgraph
+        return combined_subgraph
 
     return fastapi
 
