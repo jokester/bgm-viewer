@@ -8,7 +8,7 @@ class GraphEdge(BaseModel):
     # s for Subject, p for Person, c for Character, e for Engagement
     # directededge types: s2s
     # undirected edge types: sp / sc
-    # hyperedge types: scp (aka engagement)
+    # undirected hyperedge types: scp (aka engagement)
     subject1: m.Subject | None = None
     subject2: m.Subject | None = None
     character: m.Character | None = None
@@ -59,6 +59,10 @@ class GraphEdgeSimple(BaseModel):
 class Subgraph(BaseModel):
     """A subgraph around a "center" vertex"""
 
+    center_subject: m.Subject | None = None
+    center_character: m.Character | None = None
+    center_person: m.Person | None = None
+
     subjects: list[m.Subject] = Field(default_factory=list)
     characters: list[m.Character] = Field(default_factory=list)
     persons: list[m.Person] = Field(default_factory=list)
@@ -66,12 +70,23 @@ class Subgraph(BaseModel):
     edges: list[GraphEdgeSimple]
 
     def __add__(self, other: "Subgraph") -> "Subgraph":
+        if self.center_subject and other.center_subject:
+            assert self.center_subject.id == other.center_subject.id
+        elif self.center_character and other.center_character:
+            assert self.center_character.id == other.center_character.id
+        elif self.center_person and other.center_person:
+            assert self.center_person.id == other.center_person.id
+        else:
+            raise ValueError("Cannot add subgraphs with different centers")
+
         return Subgraph(
-            subjects=uniq_by(self.subjects + other.subjects, key=lambda s: s.id),
-            characters=uniq_by(self.characters + other.characters, key=lambda c: c.id),
+            subjects=uniq_by(self.subjects + other.subjects,
+                             key=lambda s: s.id),
+            characters=uniq_by(self.characters +
+                               other.characters, key=lambda c: c.id),
             persons=uniq_by(self.persons + other.persons, key=lambda p: p.id),
             edges=self.edges + other.edges,
-        )
+        ).compact()
 
     def compact(self) -> "Subgraph":
         """

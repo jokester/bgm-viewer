@@ -23,9 +23,12 @@
     "clsx": "catalog:deps-react",
     "debug": "catalog:deps",
     "foxact": "catalog:deps-react",
+    "graphology": "^0.26.0",
+    "immutable": "^5.1.3",
     "preact": "catalog:deps-react",
     "preact-router": "catalog:deps-react",
-    "primereact": "^10.9.7"
+    "primereact": "^10.9.7",
+    "sigma": "^3.0.2"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "catalog:dev-deps",

@@ -42,6 +42,9 @@ test: deps
 test-watch: deps
 	. venv/bin/activate && exec pytest-watcher src
 
+web-test:
+	pnpm run --filter=./web test
+
 ###
 ### SECTION deps
 ###

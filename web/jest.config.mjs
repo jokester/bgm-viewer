@@ -13,6 +13,9 @@ export default {
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': [
       '@swc-node/jest',
+      {
+        module: 'commonjs',
+      }
     ],
   },
 };

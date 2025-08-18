@@ -19,6 +19,9 @@ def test_expand_s2s():
     subgraph = repo.expand_s2s(subject)
     assert subgraph is not None
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject == subject
+    assert subgraph.center_character is None
+    assert subgraph.center_person is None
     assert isinstance(subgraph.edges, list)
     assert isinstance(subgraph.subjects, list)
 
@@ -47,6 +50,9 @@ def test_expand_s2s():
 
     subgraph = repo.expand_s2s(subject_no_relations)
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject == subject_no_relations
+    assert subgraph.center_character is None
+    assert subgraph.center_person is None
     assert subgraph.edges == []
     assert len(subgraph.subjects) == 1  # Only the starting subject
 
@@ -73,6 +79,9 @@ def test_expand_s2c():
     subgraph = repo.expand_sc(subject)
     assert subgraph is not None
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject == subject
+    assert subgraph.center_character is None
+    assert subgraph.center_person is None
     assert isinstance(subgraph.edges, list)
     assert isinstance(subgraph.subjects, list)
     assert isinstance(subgraph.characters, list)
@@ -102,6 +111,9 @@ def test_expand_s2c():
 
     subgraph = repo.expand_sc(subject_no_relations)
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject == subject_no_relations
+    assert subgraph.center_character is None
+    assert subgraph.center_person is None
     assert subgraph.edges == []
     assert len(subgraph.subjects) == 1  # Only the starting subject
     assert subgraph.characters == []
@@ -117,6 +129,9 @@ def test_expand_s2p():
     subgraph = repo.expand_sp(subject)
     assert subgraph is not None
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject == subject
+    assert subgraph.center_character is None
+    assert subgraph.center_person is None
     assert isinstance(subgraph.edges, list)
     assert isinstance(subgraph.subjects, list)
     assert isinstance(subgraph.persons, list)
@@ -146,6 +161,9 @@ def test_expand_s2p():
 
     subgraph = repo.expand_sp(subject_no_relations)
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject == subject_no_relations
+    assert subgraph.center_character is None
+    assert subgraph.center_person is None
     assert subgraph.edges == []
     assert len(subgraph.subjects) == 1  # Only the starting subject
     assert subgraph.persons == []
@@ -173,6 +191,9 @@ def test_expand_s2e():
     subgraph = repo.expand_se(subject)
     assert subgraph is not None
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject == subject
+    assert subgraph.center_character is None
+    assert subgraph.center_person is None
     assert isinstance(subgraph.edges, list)
     assert isinstance(subgraph.subjects, list)
     assert isinstance(subgraph.persons, list)
@@ -231,6 +252,9 @@ def test_expand_c2s():
     subgraph = repo.expand_cs(character)
     assert subgraph is not None
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject is None
+    assert subgraph.center_character == character
+    assert subgraph.center_person is None
     assert isinstance(subgraph.edges, list)
     assert isinstance(subgraph.subjects, list)
     assert isinstance(subgraph.characters, list)
@@ -252,6 +276,9 @@ def test_expand_c2s():
 
     subgraph = repo.expand_cs(character_no_relations)
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject is None
+    assert subgraph.center_character == character_no_relations
+    assert subgraph.center_person is None
     assert subgraph.edges == []
     assert subgraph.subjects == []
     assert len(subgraph.characters) == 1  # Only the starting character
@@ -279,6 +306,9 @@ def test_expand_p2s():
     subgraph = repo.expand_ps(person)
     assert subgraph is not None
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject is None
+    assert subgraph.center_character is None
+    assert subgraph.center_person == person
     assert isinstance(subgraph.edges, list)
     assert isinstance(subgraph.subjects, list)
     assert isinstance(subgraph.persons, list)
@@ -302,6 +332,9 @@ def test_expand_p2s():
 
     subgraph = repo.expand_ps(person_no_relations)
     assert isinstance(subgraph, Subgraph)
+    assert subgraph.center_subject is None
+    assert subgraph.center_character is None
+    assert subgraph.center_person == person_no_relations
     assert subgraph.edges == []
     assert subgraph.subjects == []
     assert len(subgraph.persons) == 1  # Only the starting person
@@ -421,23 +454,35 @@ def test_empty_results():
     # Test that all methods return Subgraph objects with empty edges
     s2s_subgraph = repo.expand_s2s(non_existent_subject)
     assert isinstance(s2s_subgraph, Subgraph)
+    assert s2s_subgraph.center_subject == non_existent_subject
+    assert s2s_subgraph.center_character is None
+    assert s2s_subgraph.center_person is None
     assert s2s_subgraph.edges == []
     assert len(s2s_subgraph.subjects) == 1  # Only the starting subject
 
     sc_subgraph = repo.expand_sc(non_existent_subject)
     assert isinstance(sc_subgraph, Subgraph)
+    assert sc_subgraph.center_subject == non_existent_subject
+    assert sc_subgraph.center_character is None
+    assert sc_subgraph.center_person is None
     assert sc_subgraph.edges == []
     assert len(sc_subgraph.subjects) == 1  # Only the starting subject
     assert sc_subgraph.characters == []
 
     sp_subgraph = repo.expand_sp(non_existent_subject)
     assert isinstance(sp_subgraph, Subgraph)
+    assert sp_subgraph.center_subject == non_existent_subject
+    assert sp_subgraph.center_character is None
+    assert sp_subgraph.center_person is None
     assert sp_subgraph.edges == []
     assert len(sp_subgraph.subjects) == 1  # Only the starting subject
     assert sp_subgraph.persons == []
 
     se_subgraph = repo.expand_se(non_existent_subject)
     assert isinstance(se_subgraph, Subgraph)
+    assert se_subgraph.center_subject == non_existent_subject
+    assert se_subgraph.center_character is None
+    assert se_subgraph.center_person is None
     assert se_subgraph.edges == []
     assert len(se_subgraph.subjects) == 1  # Only the starting subject
     assert se_subgraph.persons == []
@@ -445,12 +490,18 @@ def test_empty_results():
 
     cs_subgraph = repo.expand_cs(non_existent_character)
     assert isinstance(cs_subgraph, Subgraph)
+    assert cs_subgraph.center_subject is None
+    assert cs_subgraph.center_character == non_existent_character
+    assert cs_subgraph.center_person is None
     assert cs_subgraph.edges == []
     assert cs_subgraph.subjects == []
     assert len(cs_subgraph.characters) == 1  # Only the starting character
 
     ps_subgraph = repo.expand_ps(non_existent_person)
     assert isinstance(ps_subgraph, Subgraph)
+    assert ps_subgraph.center_subject is None
+    assert ps_subgraph.center_character is None
+    assert ps_subgraph.center_person == non_existent_person
     assert ps_subgraph.edges == []
     assert ps_subgraph.subjects == []
     assert len(ps_subgraph.persons) == 1  # Only the starting person

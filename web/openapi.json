@@ -453,24 +453,16 @@
       "Character": {
         "properties": {
           "id": { "type": "integer", "title": "Id" },
-          "role": { "$ref": "#/components/schemas/CharacterRole" },
           "name": { "type": "string", "title": "Name" },
           "infobox": { "type": "string", "title": "Infobox" },
           "summary": { "type": "string", "title": "Summary" },
           "comments": { "type": "integer", "title": "Comments" },
           "collects": { "type": "integer", "title": "Collects" }
         },
-        "additionalProperties": false,
         "type": "object",
-        "required": ["id", "role", "name", "infobox", "summary", "comments", "collects"],
+        "required": ["id", "name", "infobox", "summary", "comments", "collects"],
         "title": "Character",
         "description": "Character model."
-      },
-      "CharacterRole": {
-        "type": "integer",
-        "enum": [1, 2, 3, 4],
-        "title": "CharacterRole",
-        "description": "Character role types in Bangumi."
       },
       "CharacterSearchResult": {
         "properties": {
@@ -490,8 +482,7 @@
         "properties": {
           "query": { "type": "string", "title": "Query" },
           "limit": { "type": "integer", "title": "Limit", "default": 20 },
-          "offset": { "type": "integer", "title": "Offset", "default": 0 },
-          "role": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Role" }
+          "offset": { "type": "integer", "title": "Offset", "default": 0 }
         },
         "type": "object",
         "required": ["query"],
@@ -510,7 +501,6 @@
           "sort": { "anyOf": [{ "type": "integer" }, { "type": "number" }], "title": "Sort" },
           "type": { "$ref": "#/components/schemas/EpisodeType" }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": ["id", "name", "name_cn", "description", "disc", "duration", "subject_id", "sort", "type"],
         "title": "Episode",
@@ -649,7 +639,6 @@
           "comments": { "type": "integer", "title": "Comments" },
           "collects": { "type": "integer", "title": "Collects" }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": ["id", "name", "type", "infobox", "summary", "comments", "collects"],
         "title": "Person",
@@ -731,6 +720,9 @@
       },
       "Subgraph": {
         "properties": {
+          "center_subject": { "anyOf": [{ "$ref": "#/components/schemas/Subject" }, { "type": "null" }] },
+          "center_character": { "anyOf": [{ "$ref": "#/components/schemas/Character" }, { "type": "null" }] },
+          "center_person": { "anyOf": [{ "$ref": "#/components/schemas/Person" }, { "type": "null" }] },
           "subjects": { "items": { "$ref": "#/components/schemas/Subject" }, "type": "array", "title": "Subjects" },
           "characters": {
             "items": { "$ref": "#/components/schemas/Character" },
@@ -767,7 +759,6 @@
             "title": "Meta Tags"
           }
         },
-        "additionalProperties": false,
         "type": "object",
         "required": [
           "id",

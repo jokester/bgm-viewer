@@ -69,7 +69,11 @@ class GraphRepository:
             # Extract unique subjects from edges
             subjects = [from_subject] + [subject_row_to_model(s2) for s2, _ in rows]
 
-            return Subgraph(subjects=subjects, edges=edges)
+            return Subgraph(
+                center_subject=from_subject,
+                subjects=subjects,
+                edges=edges
+            )
 
     def expand_sp(self, subject1: m.Subject) -> Subgraph:
         """Expand s2p (subject to persons) edges from a given subject."""
@@ -96,7 +100,12 @@ class GraphRepository:
             # Extract unique persons from edges
             persons = [person_row_to_model(p) for p, _ in rows]
 
-            return Subgraph(subjects=[subject1], persons=persons, edges=edges)
+            return Subgraph(
+                center_subject=subject1,
+                subjects=[subject1],
+                persons=persons,
+                edges=edges
+            )
 
     def expand_sc(self, subject: m.Subject) -> Subgraph:
         """Expand s2c (subject to characters) edges from a given subject."""
@@ -124,7 +133,12 @@ class GraphRepository:
             # Extract unique characters from edges
             characters = [character_row_to_model(c) for c, _, _ in rows]
 
-            return Subgraph(subjects=[subject], characters=characters, edges=edges)
+            return Subgraph(
+                center_subject=subject,
+                subjects=[subject],
+                characters=characters,
+                edges=edges
+            )
 
     def expand_se(self, subject: m.Subject) -> Subgraph:
         """Expand s2e (subject to engagements) edges from a given subject."""
@@ -154,7 +168,11 @@ class GraphRepository:
             characters = [character_row_to_model(c) for _, c, _ in rows]
 
             return Subgraph(
-                subjects=[subject], persons=persons, characters=characters, edges=edges
+                center_subject=subject,
+                subjects=[subject],
+                persons=persons,
+                characters=characters,
+                edges=edges
             )
 
     def expand_cs(self, character: m.Character) -> Subgraph:
@@ -183,7 +201,12 @@ class GraphRepository:
             # Extract unique subjects from edges
             subjects = [subject_row_to_model(s) for s, _, _ in rows]
 
-            return Subgraph(subjects=subjects, characters=[character], edges=edges)
+            return Subgraph(
+                center_character=character,
+                subjects=subjects,
+                characters=[character],
+                edges=edges
+            )
 
     def expand_ce(self, character: m.Character) -> Subgraph:
         """Expand c2e (character to engagements) edges from a given character."""
@@ -213,7 +236,11 @@ class GraphRepository:
             subjects = [subject_row_to_model(s) for _, s, _ in rows]
 
             return Subgraph(
-                subjects=subjects, characters=[character], persons=persons, edges=edges
+                center_character=character,
+                subjects=subjects,
+                characters=[character],
+                persons=persons,
+                edges=edges
             )
 
     def expand_ps(self, person: m.Person) -> Subgraph:
@@ -241,7 +268,12 @@ class GraphRepository:
             # Extract unique subjects from edges
             subjects = [subject_row_to_model(s) for s, _ in rows]
 
-            return Subgraph(subjects=subjects, persons=[person], edges=edges)
+            return Subgraph(
+                center_person=person,
+                subjects=subjects,
+                persons=[person],
+                edges=edges
+            )
 
     def expand_pe(self, person: m.Person) -> Subgraph:
         """Expand p2e (person to engagements) edges from a given person."""
@@ -271,5 +303,9 @@ class GraphRepository:
             subjects = [subject_row_to_model(s) for _, s, _ in rows]
 
             return Subgraph(
-                subjects=subjects, characters=characters, persons=[person], edges=edges
+                center_person=person,
+                subjects=subjects,
+                characters=characters,
+                persons=[person],
+                edges=edges
             )
