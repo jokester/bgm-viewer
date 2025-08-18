@@ -60,6 +60,7 @@ def build_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],  # Allow all methods
         allow_headers=["*"],  # Allow all headers
+        max_age=3600,
     )
 
     es_client = get_async_client()

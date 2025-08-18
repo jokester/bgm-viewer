@@ -7,7 +7,6 @@ import { SearchPerson } from '../src/search/search-person';
 import { NetworkGraph, NetworkGraphHandle } from '../src/network-graph';
 import { Character, Person, Subgraph, Subject } from '../src/data/api';
 import { Dropdown } from 'primereact/dropdown';
-import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { useBgmApi } from '../src/data';
 import { Toast } from 'primereact/toast';

@@ -3,7 +3,7 @@ import { GraphBuilder } from './data/graph-builder';
 import { Character, Person, Subgraph, Subject } from './data/api';
 import { buildSigmaGraph, getNodeId, getNodeTypeFromData } from './data/sigma_adapter';
 import { SigmaContainer, useLoadGraph, useSigma } from '@react-sigma/core';
-import { LayoutForceAtlas2Control } from '@react-sigma/layout-forceatlas2';
+import { LayoutForceAtlas2Control, useWorkerLayoutForceAtlas2 } from '@react-sigma/layout-forceatlas2';
 import '@react-sigma/core/lib/style.css';
 import debug from 'debug';
 import { MultiDirectedGraph } from 'graphology';
@@ -21,6 +21,19 @@ const GraphLoader = ({graphBuilder}: {graphBuilder: GraphBuilder}) => {
     const graph = buildSigmaGraph(graphBuilder);
     loadGraph(graph);
   }, [graphBuilder, loadGraph]);
+
+  return null;
+};
+
+const GraphLayout1 = () => {
+  const {start, kill} = useWorkerLayoutForceAtlas2({settings: {slowDown: 10}});
+
+  useEffect(() => {
+    start();
+    return () => {
+      kill();
+    };
+  }, [start, kill]);
 
   return null;
 };
@@ -126,6 +139,7 @@ export const NetworkGraph = forwardRef<NetworkGraphHandle, {
       }}
     >
       <GraphLoader graphBuilder={state} />
+      <GraphLayout1 />
       <NodeClickHandler
         onCharacterClick={props.onCharacterClick}
         onSubjectClick={props.onSubjectClick}
