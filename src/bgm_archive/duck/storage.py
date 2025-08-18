@@ -142,7 +142,6 @@ class DuckdbStorage:
                 for character in characters:
                     dic = {
                         "id": character.id,
-                        "role": character.role.value,
                         "name": character.name,
                         "infobox": character.infobox,
                         "summary": character.summary,
@@ -326,7 +325,6 @@ CREATE TABLE IF NOT EXISTS Persons(
 
 CREATE TABLE IF NOT EXISTS Characters(
     id INTEGER PRIMARY KEY,
-    role INTEGER NOT NULL,
     name VARCHAR NOT NULL,
     infobox TEXT,
     summary TEXT,

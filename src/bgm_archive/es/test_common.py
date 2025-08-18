@@ -77,7 +77,6 @@ async def test_search_invalid_data_handling_all_indexes(
                 {
                     "_source": {
                         "id": 1,
-                        "role": 1,  # MAIN
                         "name": "Valid Character",
                         "infobox": "Valid infobox",
                         "summary": "Valid summary",

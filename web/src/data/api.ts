@@ -10,13 +10,6 @@ export enum SubjectType {
   REAL = 6,
 }
 
-export enum CharacterRole {
-  MAIN = 1,
-  SUPPORTING = 2,
-  MINOR = 3,
-  GUEST = 4,
-}
-
 export enum EpisodeType {
   NORMAL = 0,
   SPECIAL = 1,
@@ -95,7 +88,6 @@ export interface Episode {
 
 export interface Character {
   id: number;
-  role: CharacterRole;
   name: string;
   infobox: string;
   summary: string;
@@ -138,7 +130,6 @@ export interface CharactersIndexQuery {
   query: string;
   limit?: number;
   offset?: number;
-  role?: number;
 }
 
 export interface PersonsIndexQuery {

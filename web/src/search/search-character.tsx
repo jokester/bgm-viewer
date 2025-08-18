@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Character, CharacterRole, CharactersIndexQuery, CharacterSearchResult } from '../data/api';
+import { Character, CharactersIndexQuery, CharacterSearchResult } from '../data/api';
 import { useBgmApi } from '../data';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import { Dropdown } from 'primereact/dropdown';
 import { Card } from 'primereact/card';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Paginator } from 'primereact/paginator';
@@ -11,7 +10,6 @@ import { Paginator } from 'primereact/paginator';
 export const SearchCharacter = () => {
   const api = useBgmApi();
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedRole, setSelectedRole] = useState<number | null>(null);
   const [results, setResults] = useState<Character[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,14 +19,6 @@ export const SearchCharacter = () => {
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const pageSize = 20;
-
-  const characterRoleOptions = [
-    { label: '所有角色', value: null },
-    { label: '主角', value: CharacterRole.MAIN },
-    { label: '配角', value: CharacterRole.SUPPORTING },
-    { label: '次要角色', value: CharacterRole.MINOR },
-    { label: '客串角色', value: CharacterRole.GUEST },
-  ];
 
   // Debounced search function
   const debouncedSearch = useCallback((query: string) => {
@@ -68,7 +58,6 @@ export const SearchCharacter = () => {
         query: searchQuery.trim(),
         limit: pageSize,
         offset: page * pageSize,
-        role: selectedRole || undefined,
       };
 
       const searchResults = await api.searchCharacters(searchParams);
@@ -119,16 +108,6 @@ export const SearchCharacter = () => {
     performSearch(0);
   };
 
-  const formatCharacterRole = (role: number): string => {
-    switch (role) {
-      case CharacterRole.MAIN: return '主角';
-      case CharacterRole.SUPPORTING: return '配角';
-      case CharacterRole.MINOR: return '次要角色';
-      case CharacterRole.GUEST: return '客串角色';
-      default: return '未知';
-    }
-  };
-
   const truncateText = (text: string, maxLength: number = 150): string => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
@@ -139,56 +118,35 @@ export const SearchCharacter = () => {
       <h1 className="text-3xl font-bold mb-6 text-gray-800">角色搜索</h1>
       
       {/* Search Form */}
-      <Card className="mb-6">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">搜索条件</h2>
-          <p className="text-sm text-gray-600 mb-3">
-            搜索角色名称、简介和资料框信息。输入至少2个字符开始搜索。
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              <label htmlFor="searchQuery" className="block text-sm font-medium text-gray-700 mb-2">
-                搜索关键词
-              </label>
-              <div className="relative">
-                <InputText
-                  id="searchQuery"
-                  value={searchQuery}
-                  onChange={(e) => handleQueryChange(e.target.value)}
-                  onKeyUp={handleKeyPress}
-                  placeholder="按角色名称、简介、资料框搜索..."
-                  className="w-full"
-                />
-                {loading && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <ProgressSpinner style={{ width: '16px', height: '16px' }} />
-                  </div>
-                )}
-                {searchQuery.trim().length >= 2 && !loading && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <i className="pi pi-clock text-gray-400 text-sm"></i>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="characterRole" className="block text-sm font-medium text-gray-700 mb-2">
-                角色类型
-              </label>
-              <Dropdown
-                id="characterRole"
-                value={selectedRole}
-                onChange={(e) => {
-                  setSelectedRole(e.value);
-                  handleFilterChange();
-                }}
-                options={characterRoleOptions}
-                optionLabel="label"
-                optionValue="value"
-                placeholder="选择角色类型"
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">搜索条件</h2>
+        <p className="text-sm text-gray-600 mb-3">
+          搜索角色名称、简介和资料框信息。输入至少2个字符开始搜索。
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <label htmlFor="searchQuery" className="block text-sm font-medium text-gray-700 mb-2">
+              搜索关键词
+            </label>
+            <div className="relative">
+              <InputText
+                id="searchQuery"
+                value={searchQuery}
+                onChange={(e) => handleQueryChange(e.target.value)}
+                onKeyUp={handleKeyPress}
+                placeholder="按角色名称、简介、资料框搜索..."
                 className="w-full"
               />
+              {loading && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <i className="pi pi-spinner text-gray-400 text-sm"></i>
+                </div>
+              )}
+              {searchQuery.trim().length >= 2 && !loading && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <i className="pi pi-clock text-gray-400 text-sm"></i>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -219,7 +177,7 @@ export const SearchCharacter = () => {
             />
           )}
         </div>
-      </Card>
+      </div>
 
       {/* Error Display */}
       {error && (
@@ -244,11 +202,6 @@ export const SearchCharacter = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-medium text-blue-800">搜索关键词: "{searchQuery}"</h3>
-                <div className="flex items-center gap-4 mt-1 text-xs text-blue-600">
-                  {selectedRole !== null && (
-                    <span>角色类型: {characterRoleOptions.find(opt => opt.value === selectedRole)?.label}</span>
-                  )}
-                </div>
               </div>
               <Button
                 label="修改搜索"
@@ -311,60 +264,27 @@ export const SearchCharacter = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.map((character) => (
-                <Card key={character.id} className="hover:shadow-lg transition-shadow">
-                  {/* Role Label */}
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {formatCharacterRole(character.role)}
-                    </span>
-                  </div>
-                  
-                  {/* Character Name */}
-                  <div className="mb-2">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">角色名称</label>
-                    <h3 className="text-lg font-semibold text-gray-800 overflow-hidden">
-                      {character.name}
-                    </h3>
-                  </div>
-                  
-                  {/* Character Summary */}
-                  {character.summary && (
-                    <div className="mb-3">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">角色简介</label>
-                      <p className="text-sm text-gray-700 overflow-hidden">
-                        {truncateText(character.summary)}
-                      </p>
+                <Card key={character.id} className="character-card">
+                  <div className="flex items-center mb-3">
+                    <div className="w-16 h-16 rounded-full mr-3 bg-gray-200 flex items-center justify-center">
+                      <i className="pi pi-user text-2xl text-gray-400"></i>
                     </div>
-                  )}
-                  
-                  {/* Statistics */}
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-gray-500 mb-2">统计信息</label>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <i className="pi pi-comment text-blue-500 mr-1"></i>
-                        <span>评论: {character.comments}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <i className="pi pi-heart text-red-500 mr-1"></i>
-                        <span>收藏: {character.collects}</span>
-                      </div>
-                    </div>
+                    <h3 className="text-lg font-bold text-gray-800">{character.name}</h3>
                   </div>
-                  
-                  {/* Infobox */}
+                  <p className="text-sm text-gray-600 mb-2">{character.summary}</p>
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                    <span>评论: {character.comments}</span>
+                    <span>收藏: {character.collects}</span>
+                  </div>
                   {character.infobox && (
-                    <div className="mt-3">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">资料框</label>
-                      <details className="text-xs">
-                        <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
-                          显示详细资料
-                        </summary>
-                        <div className="mt-2 p-2 bg-gray-50 rounded text-gray-700 whitespace-pre-wrap">
-                          {truncateText(character.infobox, 200)}
-                        </div>
-                      </details>
-                    </div>
+                    <details className="text-xs">
+                      <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                        显示详细资料
+                      </summary>
+                      <div className="mt-2 p-2 bg-gray-50 rounded text-gray-700 whitespace-pre-wrap">
+                        {truncateText(character.infobox, 200)}
+                      </div>
+                    </details>
                   )}
                 </Card>
               ))}

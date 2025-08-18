@@ -243,7 +243,6 @@ def test_expand_c2s():
 
         character_no_relations = m.Character(
             id=999999,
-            role=m.CharacterRole.MAIN,
             name="Test Character",
             infobox="",
             summary="",
@@ -401,7 +400,6 @@ def test_empty_results():
 
     non_existent_character = m.Character(
         id=999999,
-        role=m.CharacterRole.MAIN,
         name="Test Character",
         infobox="",
         summary="",

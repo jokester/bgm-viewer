@@ -3,7 +3,10 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .normalizer import launder_date
 
-_config = ConfigDict(use_enum_values=False, str_strip_whitespace=True, extra="forbid")
+_config = ConfigDict(
+    use_enum_values=False,
+    str_strip_whitespace=True,  # extra="forbid"
+)
 
 
 class SubjectType(IntEnum):
@@ -24,16 +27,6 @@ class PersonType(IntEnum):
     INDIVIDUAL = 1  # 个人
     COMPANY = 2  # 公司
     ASSOCIATION = 3  # 组合
-
-
-class CharacterRole(IntEnum):
-    """Character role types in Bangumi."""
-
-    MAIN = 1  # 主角
-    SUPPORTING = 2  # 配角
-    GUEST = 3  # 客串
-
-    OTHER = 4  # 其他
 
 
 class EpisodeType(IntEnum):
@@ -531,8 +524,6 @@ class Character(BaseModel):
     model_config = _config
 
     id: int
-    # TODO: should we ignore this? SubjectCharacterType seems to provide more adequate information
-    role: CharacterRole
     name: str
     infobox: str
     summary: str

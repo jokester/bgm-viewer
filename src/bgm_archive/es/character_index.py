@@ -11,7 +11,6 @@ class CharactersIndexQuery(BaseModel):
     query: str
     limit: int = 20
     offset: int = 0
-    role: Optional[int] = None
 
 
 class CharacterSearchResult(SearchResult[model.Character]):
@@ -55,12 +54,6 @@ class CharacterIndex(BaseIndex[model.Character]):
             ],
         }
 
-        # Add filters if specified
-        if search_query.role is not None:
-            query_body["query"]["bool"]["filter"].append(
-                {"term": {"role": search_query.role}}
-            )
-
         response = await self._es.search(index=self._index_name, body=query_body)
 
         hits = response.get("hits", {}).get("hits", [])
@@ -91,7 +84,6 @@ class CharacterIndex(BaseIndex[model.Character]):
         return {
             "properties": {
                 "id": {"type": "long"},
-                "role": {"type": "integer"},
                 "name": {"type": "text", "analyzer": "mixed_cjk_english"},
                 "infobox": {"type": "text", "analyzer": "mixed_cjk_english"},
                 "summary": {"type": "text", "analyzer": "mixed_cjk_english"},

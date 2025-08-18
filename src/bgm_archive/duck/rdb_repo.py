@@ -50,7 +50,6 @@ def character_row_to_model(row: pd.Series | dict) -> m.Character:
     return m.Character.model_validate(
         {
             "id": row["id"],
-            "role": m.CharacterRole(row["role"]),
             "name": row["name"],
             "infobox": row["infobox"],
             "summary": row["summary"],

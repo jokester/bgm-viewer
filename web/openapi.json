@@ -254,6 +254,30 @@
         }
       }
     },
+    "/characters/{character_id}/edges": {
+      "get": {
+        "summary": "Get Character Edges",
+        "operationId": "get_character_edges_characters__character_id__edges_get",
+        "parameters": [
+          {
+            "name": "character_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "title": "Character Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Subgraph" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
     "/people/{person_id}": {
       "get": {
         "summary": "Get Person",
@@ -297,6 +321,25 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/people/{person_id}/edges": {
+      "get": {
+        "summary": "Get Person Edges",
+        "operationId": "get_person_edges_people__person_id__edges_get",
+        "parameters": [
+          { "name": "person_id", "in": "path", "required": true, "schema": { "type": "integer", "title": "Person Id" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Subgraph" } } }
           },
           "422": {
             "description": "Validation Error",
@@ -556,16 +599,16 @@
         ],
         "title": "GameStaff"
       },
-      "GraphEdge": {
+      "GraphEdgeSimple": {
         "properties": {
-          "to_subject": { "anyOf": [{ "$ref": "#/components/schemas/Subject" }, { "type": "null" }] },
-          "to_character": { "anyOf": [{ "$ref": "#/components/schemas/Character" }, { "type": "null" }] },
-          "to_person": { "anyOf": [{ "$ref": "#/components/schemas/Person" }, { "type": "null" }] },
+          "subject1_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Subject1 Id" },
+          "subject2_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Subject2 Id" },
+          "character_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Character Id" },
+          "person_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Person Id" },
           "s2s_relation_type": {
             "anyOf": [{ "$ref": "#/components/schemas/SubjectRelationType" }, { "type": "null" }]
           },
-          "p2c_summary": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "P2C Summary" },
-          "s2p_position": {
+          "sp_position": {
             "anyOf": [
               { "$ref": "#/components/schemas/AnimeStuff" },
               { "$ref": "#/components/schemas/BookStaff" },
@@ -574,12 +617,14 @@
               { "$ref": "#/components/schemas/RealStaff" },
               { "type": "null" }
             ],
-            "title": "S2P Position"
+            "title": "Sp Position"
           },
-          "s2c_type": { "anyOf": [{ "$ref": "#/components/schemas/SubjectCharacterType" }, { "type": "null" }] }
+          "sc_type": { "anyOf": [{ "$ref": "#/components/schemas/SubjectCharacterType" }, { "type": "null" }] },
+          "sc_order_idx": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Sc Order Idx" },
+          "engagement_summary": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Engagement Summary" }
         },
         "type": "object",
-        "title": "GraphEdge"
+        "title": "GraphEdgeSimple"
       },
       "HTTPValidationError": {
         "properties": {
@@ -686,15 +731,19 @@
       },
       "Subgraph": {
         "properties": {
-          "from_subject": { "anyOf": [{ "$ref": "#/components/schemas/Subject" }, { "type": "null" }] },
-          "from_character": { "anyOf": [{ "$ref": "#/components/schemas/Character" }, { "type": "null" }] },
-          "from_person": { "anyOf": [{ "$ref": "#/components/schemas/Person" }, { "type": "null" }] },
-          "edges": { "items": { "$ref": "#/components/schemas/GraphEdge" }, "type": "array", "title": "Edges" }
+          "subjects": { "items": { "$ref": "#/components/schemas/Subject" }, "type": "array", "title": "Subjects" },
+          "characters": {
+            "items": { "$ref": "#/components/schemas/Character" },
+            "type": "array",
+            "title": "Characters"
+          },
+          "persons": { "items": { "$ref": "#/components/schemas/Person" }, "type": "array", "title": "Persons" },
+          "edges": { "items": { "$ref": "#/components/schemas/GraphEdgeSimple" }, "type": "array", "title": "Edges" }
         },
         "type": "object",
         "required": ["edges"],
         "title": "Subgraph",
-        "description": "A subgraph of vertices/edges around to a \"from\" vertex"
+        "description": "A subgraph around a \"center\" vertex"
       },
       "Subject": {
         "properties": {

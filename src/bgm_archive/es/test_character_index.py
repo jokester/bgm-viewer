@@ -14,7 +14,6 @@ async def test_search_characters_basic(characters_index, mock_es_client):
                 {
                     "_source": {
                         "id": 1,
-                        "role": 1,  # MAIN
                         "name": "Test Character",
                         "infobox": "Test infobox",
                         "summary": "Test summary",
@@ -40,7 +39,6 @@ async def test_search_characters_basic(characters_index, mock_es_client):
     assert len(results.items) == 1
     assert results.items[0].id == 1
     assert results.items[0].name == "Test Character"
-    assert results.items[0].role == model.CharacterRole.MAIN
 
     # Verify ES client was called correctly
     mock_es_client.search.assert_called_once()
@@ -68,7 +66,6 @@ async def test_search_characters_with_filters(characters_index, mock_es_client):
         query="test",
         limit=10,
         offset=5,
-        role=1,  # MAIN
     )
 
     # Perform search
@@ -78,13 +75,9 @@ async def test_search_characters_with_filters(characters_index, mock_es_client):
     call_args = mock_es_client.search.call_args
     query_body = call_args[1]["body"]
 
-    # Check filters
+    # Check filters - should be empty since we removed role filtering
     filters = query_body["query"]["bool"]["filter"]
-    assert len(filters) == 1
-
-    # Role filter
-    role_filter = next(f for f in filters if "term" in f and "role" in f["term"])
-    assert role_filter["term"]["role"] == 1
+    assert len(filters) == 0
 
     # Verify pagination
     assert query_body["size"] == 10
@@ -101,7 +94,6 @@ async def test_search_characters_pagination(characters_index, mock_es_client):
                 {
                     "_source": {
                         "id": i,
-                        "role": 1,
                         "name": f"Character {i}",
                         "infobox": f"Infobox {i}",
                         "summary": f"Summary {i}",
@@ -157,7 +149,6 @@ async def test_search_characters_sorting(characters_index, mock_es_client):
                 {
                     "_source": {
                         "id": 1,
-                        "role": 1,
                         "name": "Popular Character",
                         "infobox": "Infobox",
                         "summary": "Summary",
@@ -242,7 +233,6 @@ async def test_search_characters_invalid_data_handling(
                 {
                     "_source": {
                         "id": 1,
-                        "role": 1,
                         "name": "Valid Character",
                         "infobox": "Valid infobox",
                         "summary": "Valid summary",

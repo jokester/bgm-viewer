@@ -27,7 +27,6 @@ def test_find_character_by_id():
     assert character is not None
     assert character.id == 1
     assert hasattr(character, "name")
-    assert hasattr(character, "role")
 
     # Test invalid ID
     character_none = repo.find_character_by_id(-1)
