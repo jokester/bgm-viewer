@@ -49,6 +49,7 @@
     "jest": "catalog:dev-deps",
     "postcss": "catalog:dev-deps",
     "react": "catalog:deps-react",
+    "@tailwindcss/postcss": "^4.1.12",
     "react-dom": "catalog:deps-react",
     "rollup-plugin-visualizer": "catalog:dev-deps",
     "sass": "catalog:dev-deps",
